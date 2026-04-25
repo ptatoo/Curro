@@ -24,7 +24,7 @@ function App() {
 
             <main style={{ padding: "20px" }}>
               <Routes>
-                <Route path="/" element={<Home />} />
+                <Route path="/" element={<Dashboard />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/lobbies" element={<Lobbies />} />
                 <Route path="/settings" element={<Settings />} />
