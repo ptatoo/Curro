@@ -1,25 +1,91 @@
-import React, { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useMemo } from "react";
 import type { ReactNode } from "react";
-import type { UserContextType, UserProfile } from "../types/auth";
+import type { UserContextType, UserProfile } from "../types/authTypes";
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [jwtToken, setJwtToken] = useState<string | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [location, setLocation] = useState<string>("Unknown");
-  const [runDistance, setRunDistance] = useState<number>(0.0);
-  const [runPace, setRunPace] = useState<number>(0.0);
 
-  const setAuth = (token: string, userProfile: UserProfile) => {
-    setJwtToken(token);
-    setProfile(userProfile);
+  //Jwt Token Storage
+  const [jwtToken, setJwtToken] = useState<string | null>(() => {
+    return localStorage.getItem("app_jwt_token");
+  });
+
+  useMemo(() => {
+    if (jwtToken) {
+      localStorage.setItem("app_jwt_token", jwtToken);
+    } else {
+      localStorage.removeItem("app_jwt_token");
+    }
+  }, [jwtToken]);
+
+  //Profile Storage
+  const [profile, setProfile] = useState<UserProfile | null>(() => {
+    const storage = localStorage.getItem("app_profile");
+    if (storage) {
+      return JSON.parse(storage) as UserProfile;
+    }
+    return null;
+  });
+
+  // setProfile({
+  //   uid: "FAKE UID",
+  //   email: "i.alexander.song@gmail.com",
+  //   name: "Alex",
+  //   minDistance: 0, // Double
+  //   maxDistance: 0, // Double
+  //   minPace: 0, // Double
+  //   maxPace: 0, // Double
+  //   friends: [],
+  //   location: null,
+  // } as UserProfile);
+
+  useMemo(() => {
+    if (profile) {
+      localStorage.setItem("app_profile", JSON.stringify(profile));
+    } else {
+      localStorage.removeItem("app_profile");
+    }
+  }, [profile]);
+
+  //update user Profile
+  const updateUserDistance = (minDistance: number, maxDistance: number) => {
+    setProfile((prevProfile) => {
+      if (!prevProfile) return null;
+
+      return {
+        ...prevProfile,
+        minDistance, // Shorthand for minDistance: minDistance
+        maxDistance,
+      };
+    });
   };
 
-  const updateRunStats = (distance: number, pace: number) => {
-    setRunDistance(distance);
-    setRunPace(pace);
+  const updateUserPace = (minPace: number, maxPace: number) => {
+    setProfile((prevProfile) => {
+      if (!prevProfile) return null;
+
+      return {
+        ...prevProfile,
+        minPace,
+        maxPace,
+      };
+    });
   };
+
+  const updateUserLocation = (location: string) => {
+    setProfile((prevProfile) => {
+      if (!prevProfile) return null;
+
+      return {
+        ...prevProfile,
+        location,
+      };
+    });
+  };
+
+  const updateRunStats = (distance: number, pace: number) => {};
 
   const logout = () => {
     setJwtToken(null);
@@ -31,10 +97,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       value={{
         jwtToken,
         profile,
-        location,
-        runDistance,
-        runPace,
-        setAuth,
+        setJwtToken,
+        setProfile,
+        updateUserDistance,
+        updateUserPace,
+        updateUserLocation,
         updateRunStats,
         logout,
       }}
