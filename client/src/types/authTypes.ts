@@ -2,7 +2,7 @@ import type { Dispatch } from "react";
 import type { SetStateAction } from "react";
 
 export interface UserProfile {
-  uid: number;
+  uid: string;
   email: string;
   name: string;
 
