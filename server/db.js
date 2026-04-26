@@ -15,6 +15,7 @@ db.exec(`
     dist_pref REAL DEFAULT -1,
     total_runs INTEGER DEFAULT 0
   );
+}
 
   CREATE TABLE IF NOT EXISTS lobbies (
     id TEXT PRIMARY KEY,

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useUser } from '../context/UserContext';
-import { fetchGoogleProfile } from '../services/api';
+import { API } from '../services/api';
 
 //TODO: FIX
 export const useProfile = () => {
@@ -12,10 +12,11 @@ export const useProfile = () => {
 
       try {
         //PLACEHOLDERS
-        const data = await fetchGoogleProfile(jwtToken);
+        const data = await API.user.getMe(jwtToken);
+        console.log(data);
         
         setProfile({
-          uid: data.sub,
+          id: data.sub,
           email: data.email,
           name: data.name,
           minDistance: 0,
