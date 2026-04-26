@@ -1,32 +1,54 @@
-const BACKEND_URL = "http://localhost:3000";
+// For Vite (React Web on port 5173), use import.meta.env
 
-/* Google OAuth
-Description: Sends Google Auth Code to Backend.
-Param: Code
-Return: JWT
- */
-export const fetchJwtToken = async (code: string): Promise<string> => {
-    //TODO: MAKE THIS WORK
-  const response = await fetch(`${BACKEND_URL}/api/auth/google`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ code }),
-  });
+import type { UserProfile } from "../types/authTypes";
+
+// For Create React App, use process.env.REACT_APP_BACKEND_URL
+const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+
+const apiFetch = async (path: string, { method = 'GET', token, body }: { method?: string; token?: string; body?: any } = {}) => {
+  const url = path.startsWith('http') ? path : `${BASE_URL}${path}`;
   
-  if (!response.ok) throw new Error("Backend authentication failed");
-  const data = await response.json();
-  return data.sessionToken
+  const res = await fetch(url, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { "Authorization": `Bearer ${token}` }),
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || res.statusText);
+  }
+  
+  return res.json();
 };
 
-/* Google Profile
-Description: Fetches profile from Google using the Access Token.
-Param: accessToken
-Return: response.json();
- */
-export const fetchGoogleProfile = async (googleAccessToken: string) => {
-  const response = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-    headers: { Authorization: `Bearer ${googleAccessToken}` },
-  });
-  if (!response.ok) throw new Error("Google Profile Fetch Failed");
-  return response.json();
+export const API = {
+  auth: {
+    exchangeGoogleCode: async (code: string): Promise<string> => {
+      const data = await apiFetch('/api/auth/google', { method: 'POST', body: { code } });
+      return data.sessionToken;
+    },
+    
+    getGoogleProfile: (googleAccessToken: string) => 
+      apiFetch('https://www.googleapis.com/oauth2/v3/userinfo', { token: googleAccessToken }),
+  },
+  
+  user: {
+    getMe: (token: string) => 
+      apiFetch('/api/users/me', { token }),
+    
+    updateMe: (token: string, data: UserProfile) => 
+      apiFetch('/api/users/me', { method: 'PUT', token, body: data }),
+  },
+  
+  lobbies: {
+    list: (token: string) => 
+      apiFetch('/api/lobbies', { token }),
+      
+    join: (token: string, lobbyId: string) => 
+      apiFetch(`/api/lobbies/${lobbyId}/join`, { method: 'POST', token }),
+  }
 };

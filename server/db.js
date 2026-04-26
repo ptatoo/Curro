@@ -13,16 +13,7 @@ db.exec(`
     location TEXT NULL,
     pace_avg REAL DEFAULT -1,
     dist_pref REAL DEFAULT -1,
-    total_runs INTEGER DEFAULT 0,
-  );
-
-  CREATE TABLE IF NOT EXISTS routes (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    start_coord TEXT NOT NULL,
-    end_coord TEXT NOT NULL,
-    distance REAL,
-    map_polyline TEXT
+    total_runs INTEGER DEFAULT 0
   );
 
   CREATE TABLE IF NOT EXISTS lobbies (
@@ -46,6 +37,17 @@ db.exec(`
     FOREIGN KEY (user_id) REFERENCES userInfo(id) ON DELETE CASCADE
   );
 `);
+/*
+  CREATE TABLE IF NOT EXISTS routes (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    start_coord TEXT NOT NULL,
+    end_coord TEXT NOT NULL,
+    distance REAL,
+    map_polyline TEXT
+  );
+*/
+// COMMENTED OUT, ROUTES WILL BE IMPLEMENTED IN THE FUTURE when routes get impleented
 
 const Users = {
   create: (user) => db.prepare(`INSERT INTO userInfo (id, googleId, email, name) VALUES (@id, @googleId, @email, @name)`).run(user),
@@ -54,10 +56,12 @@ const Users = {
   updateSettings: (data) => db.prepare(`UPDATE userInfo SET location = @location, pace_avg = @pace_avg, dist_pref = @dist_pref WHERE id = @id`).run(data)
 };
 
+/*
 const Routes = {
   create: (route) => db.prepare(`INSERT INTO routes (id, name, start_coord, end_coord, distance) VALUES (@id, @name, @start_coord, @end_coord, @distance)`).run(route),
   getAll: () => db.prepare(`SELECT * FROM routes`).all(),
 };
+*/
 
 const Lobbies = {
   create: (lobby) => db.prepare(`INSERT INTO lobbies (id, creator_id, route_id, start_time, max_players, target_pace, is_private) VALUES (@id, @creator_id, @route_id, @start_time, @max_players, @target_pace, @is_private)`).run(lobby),
@@ -68,4 +72,8 @@ const Lobbies = {
   leave: (lobbyId, userId) => db.prepare(`DELETE FROM lobby_members WHERE lobby_id = ? AND user_id = ?`).run(lobbyId, userId)
 };
 
-module.exports = { Users, Routes, Lobbies };
+const Test = {
+  getData: (tableName) => db.prepare(`SELECT * FROM ${tableName}`).all()
+}
+
+module.exports = { Test, Users, /*Routes,*/ Lobbies };

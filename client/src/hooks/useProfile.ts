@@ -11,9 +11,7 @@ export const useProfile = () => {
       if (!jwtToken) return;
 
       try {
-        // In a real app, your backend would provide the Google Access Token
-        // or your backend would fetch the profile for you. 
-        // Here, we assume the 'jwtToken' contains or allows access to the profile.
+        //PLACEHOLDERS
         const data = await fetchGoogleProfile(jwtToken);
         
         setProfile({

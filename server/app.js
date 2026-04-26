@@ -3,20 +3,25 @@ const express = require('express');
 const { OAuth2Client } = require('google-auth-library');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-const { Users, Routes, Lobbies } = require('./db.js');
+const { Test, Users, Routes, Lobbies } = require('./db.js');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const oAuth2ClientWeb = new OAuth2Client(process.env.CLIENT_ID, process.env.CLIENT_SECRET);
+const CLIENT_ID = process.env.CLIENT_ID;
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
+const REDIRECT_URI = process.env.REDIRECT_URI;
+const JWT_SECRET = process.env.JWT_SECRET;
+
+const oAuth2ClientWeb = new OAuth2Client(CLIENT_ID, CLIENT_SECRET);
 
 // --- Middleware ---
 const authenticate = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1];
   if (!token) return res.sendStatus(401);
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) return res.sendStatus(403);
     req.userId = decoded.userId; 
     next();
@@ -24,8 +29,8 @@ const authenticate = (req, res, next) => {
 };
 
 const getJWTToken = (userId) => {
-  const sessionToken = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
-  const { exp } = jwt.verify(sessionToken, process.env.JWT_SECRET);
+  const sessionToken = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
+  const { exp } = jwt.verify(sessionToken, JWT_SECRET);
   return { sessionToken, expiryDate: exp }; 
 };
 
@@ -46,12 +51,12 @@ app.post('/api/auth/google', useRoute(async (req, res) => {
 
   const { tokens } = await oAuth2ClientWeb.getToken({
     code: code,
-    redirect_uri: process.env.REDIRECT_URI
+    redirect_uri: REDIRECT_URI
   });
   
   const ticket = await oAuth2ClientWeb.verifyIdToken({
     idToken: tokens.id_token,
-    audience: process.env.CLIENT_ID,
+    audience: CLIENT_ID,
   });
 
   const { sub: googleId, email, name } = ticket.getPayload();
@@ -73,6 +78,7 @@ app.put('/api/users/me', authenticate, useRoute(async (req, res) => {
   res.status(200).json({ success: true });
 }));
 
+/*
 // --- Routes ---
 app.get('/api/routes', authenticate, useRoute(async (req, res) => {
   res.status(200).json(Routes.getAll());
@@ -83,6 +89,7 @@ app.post('/api/routes', authenticate, useRoute(async (req, res) => {
   Routes.create({ ...req.body, id });
   res.status(201).json({ id });
 }));
+*/ //deprecated untill we get it working
 
 // --- Lobbies ---
 app.get('/api/lobbies', authenticate, useRoute(async (req, res) => {
@@ -114,9 +121,19 @@ app.delete('/api/lobbies/:id/leave', authenticate, useRoute(async (req, res) => 
   res.status(200).json({ success: true });
 }));
 
+// --- ULTIMATE TESTER LOL ---
 app.get('/TEST', useRoute(async (req, res) => {
   res.status(200).json("URAAZING");
 }));
+
+app.get('/TEST', useRoute(async (req, res) => {
+  res.status(200).json("URAAZING");
+}));
+
+app.get('/getData', (req, res) => {
+  const tableName = req.query.tableName; 
+  res.send(Test.getData(tableName));
+});
 
 // --- Init ---
 const PORT = process.env.PORT || 3000;
