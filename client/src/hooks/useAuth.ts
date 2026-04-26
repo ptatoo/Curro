@@ -11,8 +11,9 @@ export const useAuth = () => {
         // Send google's oauth code to backend for accessToken
         const token = await fetchJwtToken(codeResponse.code);
         
-        // 3. Store in Global Context
+        // Store in Global Context
         setJwtToken(token);
+
       } catch (err) {
         console.error("Auth Flow Error:", err);
       }

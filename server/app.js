@@ -87,13 +87,14 @@ app.post('/api/auth/google', useRoute(async (req, res) => {
     audience: process.env.CLIENT_ID,
   });
 
+  //USER CREATION
   const { sub: googleId, email, name } = ticket.getPayload();
-  
   const existingUser = Users.getById(googleId);
   if (!existingUser) {
     Users.create({ id: googleId, googleId, email, name });
   }
 
+  //getting jwt session id
   const sessionData = getJWTToken(googleId);
   res.status(200).json(sessionData);
 }));
@@ -101,6 +102,7 @@ app.post('/api/auth/google', useRoute(async (req, res) => {
 
 
 //TESTESTSETSETSETSETSETSETSETSSETSETSETSETAETSETSETAETSETSETAETSETSETAETSETSETAETSETSETAETSETSETA
+
 app.get('/test-auth', authenticate, useRoute(async (req, res) => {
   console.log(req.userId);
   res.status(200).json({ success: true, message: "JWT is valid", user: req.userId });
