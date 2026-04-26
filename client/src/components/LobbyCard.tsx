@@ -1,10 +1,10 @@
 import { CheckCircle } from "lucide-react";
-import type { RunRoute, RunGroup } from "../types/runTypes";
+import type { RunRoute, Lobby } from "../types/runTypes";
 
 interface LobbyCardProps {
   isJoined?: boolean;
   thisRoute: RunRoute;
-  thisLobby: RunGroup;
+  thisLobby: Lobby;
   onClick?: () => void;
 }
 

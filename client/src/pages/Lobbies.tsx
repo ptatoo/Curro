@@ -2,7 +2,7 @@ import { ArrowLeft, Plus, X, CheckCircle, Trash2, Map } from "lucide-react";
 import { LobbyCard } from "../components/LobbyCard";
 import { useNavigate } from "react-router-dom";
 import { useRuns } from "../context/RunContext";
-import type { RunGroup, RunRoute } from "../types/runTypes";
+import type { Lobby, RunRoute } from "../types/runTypes";
 import { useEffect, useState } from "react";
 import StaticRouteMap from "../components/RouteMap";
 import { useUser } from "../context/UserContext";
@@ -23,9 +23,9 @@ export default function Lobbies() {
   } = useRuns();
   const { profile } = useUser();
 
-  const [selectedLobby, setSelectedLobby] = useState<RunGroup | null>(null);
+  const [selectedLobby, setSelectedLobby] = useState<Lobby | null>(null);
 
-  const isJoined = (run: RunGroup): boolean => {
+  const isJoined = (run: Lobby): boolean => {
     if (!profile) return false;
     const exists = myPrivateRuns.find((r) => r.id === run.id);
     if (exists) return true;
@@ -33,18 +33,18 @@ export default function Lobbies() {
     if (exists2) return true;
     return false;
   };
-  const isOwner = (run: RunGroup): boolean => {
+  const isOwner = (run: Lobby): boolean => {
     if (!profile) return false;
     return run.creatorId === profile.uid;
   };
 
-  const handleJoin = (run: RunGroup) => {
+  const handleJoin = (run: Lobby) => {
     if (!profile?.uid) return;
 
     if (!isJoined(run)) {
       const setter = run.isPrivate ? setPrivateRuns : setPublicRuns;
 
-      setter((prevRuns: RunGroup[]) => {
+      setter((prevRuns: Lobby[]) => {
         return prevRuns.map((r) => {
           if (r.id === run.id) {
             return {
@@ -61,13 +61,13 @@ export default function Lobbies() {
   };
 
   //leave a runGroup
-  const handleLeave = (run: RunGroup) => {
+  const handleLeave = (run: Lobby) => {
     if (!profile?.uid) return;
 
     if (isJoined(run)) {
       const setter = run.isPrivate ? setPrivateRuns : setPublicRuns;
 
-      setter((prevRuns: RunGroup[]) => {
+      setter((prevRuns: Lobby[]) => {
         return prevRuns.map((r) => {
           if (r.id === run.id) {
             return {
@@ -83,7 +83,7 @@ export default function Lobbies() {
     setSelectedLobby(null);
   };
   //add default functions
-  const handleDelete = (run: RunGroup) => {
+  const handleDelete = (run: Lobby) => {
     removeRun(run.id);
     setSelectedLobby(null);
   };

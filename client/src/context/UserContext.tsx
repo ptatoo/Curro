@@ -79,18 +79,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
       return { ...prev, ...updates };
     });
-
-    
-  // 4. Lobby Methods (Auto-injects jwtToken)
-  const getLobbies = async () => {
-    if (!jwtToken) throw new Error("Not authenticated");
-    return await API.lobbies.list(jwtToken);
-  };
-
-  const joinLobby = async (lobbyId: string) => {
-    if (!jwtToken) throw new Error("Not authenticated");
-    return await API.lobbies.join(jwtToken, lobbyId);
-  };
     
     //try syncing with cloud
     if(jwtToken)
@@ -103,6 +91,18 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       // Optional: Add a toast notification here to tell the user "Changes may not be saved"
     }
     console.error("it all works")
+  };
+  
+    
+  // 4. Lobby Methods (Auto-injects jwtToken)
+  const getLobbies = async () => {
+    if (!jwtToken) throw new Error("Not authenticated");
+    return await API.lobbies.list(jwtToken);
+  };
+
+  const joinLobby = async (lobbyId: string) => {
+    if (!jwtToken) throw new Error("Not authenticated");
+    return await API.lobbies.join(jwtToken, lobbyId);
   };
 
   //----------------------------------

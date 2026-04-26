@@ -1,17 +1,17 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import type { RunGroup, RunContextType, RunStatus } from "../types/runTypes.ts";
+import type { Lobby, LobbyContextType, RunStatus } from "../types/runTypes.ts";
 import type { RunRoute } from "../types/runTypes.ts";
 import { useUser } from "./UserContext.tsx";
 import type { UserProfile } from "../types/authTypes.ts";
 
-const RunContext = createContext<RunContextType | undefined>(undefined);
+const RunContext = createContext<LobbyContextType | undefined>(undefined);
 
 export const RunProvider = ({ children }: { children: ReactNode }) => {
-  const [publicRuns, setPublicRuns] = useState<RunGroup[]>([]);
-  const [privateRuns, setPrivateRuns] = useState<RunGroup[]>([]);
-  const [myPublicRuns, setMyPublicRuns] = useState<RunGroup[]>([]);
-  const [myPrivateRuns, setMyPrivateRuns] = useState<RunGroup[]>([]);
+  const [publicRuns, setPublicRuns] = useState<Lobby[]>([]);
+  const [privateRuns, setPrivateRuns] = useState<Lobby[]>([]);
+  const [myPublicRuns, setMyPublicRuns] = useState<Lobby[]>([]);
+  const [myPrivateRuns, setMyPrivateRuns] = useState<Lobby[]>([]);
   const [routes, setRoutes] = useState<RunRoute[]>([]);
   const { profile } = useUser();
 
@@ -34,7 +34,7 @@ export const RunProvider = ({ children }: { children: ReactNode }) => {
     setMyPrivateRuns(userPrivate);
   }, [publicRuns, privateRuns, profile?.uid]);
 
-  const addRun = (run: RunGroup) => {
+  const addRun = (run: Lobby) => {
     if (run.isPrivate) {
       setPrivateRuns((prev) => {
         const exists = prev.some((r) => r.id === run.id);
@@ -64,7 +64,7 @@ export const RunProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateRunStatus = (runId: number, status: RunStatus) => {
-    const updater = (runs: RunGroup[]) =>
+    const updater = (runs: Lobby[]) =>
       runs.map((r) => (r.id === runId ? { ...r, status } : r));
     setPublicRuns(updater);
     setPrivateRuns(updater);

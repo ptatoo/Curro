@@ -3,7 +3,7 @@ import type { SetStateAction } from "react";
 
 export type RunStatus = 'open' | 'active' | 'completed';
 
-export interface RunGroup {
+export interface Lobby {
   id: number;
   creatorId: number;
   routeId: number;
@@ -15,15 +15,15 @@ export interface RunGroup {
   status: RunStatus;
 }
 
-export interface RunContextType {
-  publicRuns: RunGroup[];
-  privateRuns: RunGroup[];
-  myPublicRuns: RunGroup[];
-  myPrivateRuns: RunGroup[];
+export interface LobbyContextType {
+  publicRuns: Lobby[];
+  privateRuns: Lobby[];
+  myPublicRuns: Lobby[];
+  myPrivateRuns: Lobby[];
   runRoutes: RunRoute[];
-  setPublicRuns: Dispatch<SetStateAction<RunGroup[]>>
-  setPrivateRuns: Dispatch<SetStateAction<RunGroup[]>>
-  addRun: (run: RunGroup) => void;
+  setPublicRuns: Dispatch<SetStateAction<Lobby[]>>
+  setPrivateRuns: Dispatch<SetStateAction<Lobby[]>>
+  addRun: (run: Lobby) => void;
   removeRun: (runId: number) => void;
   updateRunStatus: (runId: number, status: RunStatus) => void;
   addRoute: (runRoute: RunRoute) => void;
