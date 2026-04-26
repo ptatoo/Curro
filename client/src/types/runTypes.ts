@@ -4,7 +4,7 @@
   export type RunStatus = 'open' | 'active' | 'completed';
 
   export interface Lobby {
-    id: string;
+    id: number;
     creatorId: number;
     routeId: number;
     startTime: Date;
