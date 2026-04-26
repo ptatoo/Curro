@@ -14,6 +14,8 @@ import { useUser } from "../context/UserContext";
 import type { UserProfile } from "../types/authTypes";
 import PlaceAutocomplete from "../components/PlaceAutocomplete";
 
+const MI_TO_KM = 1.60934;
+
 type Settings = {
   location: string;
   distanceGoalKm: number; // always stored in km internally
@@ -64,20 +66,26 @@ export default function Settings() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+
     const minDistKm =
-      unit === "km" ? draftProfile.minDist : miToKm(draftProfile.minDist);
+      unit === "km"
+        ? draftProfile.minDist
+        : Math.round(miToKm(draftProfile.minDist) * 10) / 10;
+
     const maxDistKm =
-      unit === "km" ? draftProfile.maxDist : miToKm(draftProfile.maxDist);
+      unit === "km"
+        ? draftProfile.maxDist
+        : Math.round(miToKm(draftProfile.maxDist) * 10) / 10;
     setProfile((profilePrev) => {
       if (!profilePrev) return null;
       return {
         ...profilePrev,
         location: draftProfile.location,
-        minDist: minDistKm,
-        maxDist: maxDistKm,
+        minDistance: minDistKm,
+        maxDistance: maxDistKm,
         minPace: draftProfile.minPace,
         maxPace: draftProfile.maxPace,
-      };
+      } as UserProfile;
     });
 
     // 3. Update the Local Draft State (to keep it in sync)
@@ -85,6 +93,8 @@ export default function Settings() {
       ...prev,
       minDist: minDistKm,
       maxDist: maxDistKm,
+      minPace: draftProfile.minPace,
+      maxPace: draftProfile.maxPace,
     }));
     setIsEditing(false);
   };
@@ -93,6 +103,26 @@ export default function Settings() {
     setDraftProfile((prev) => {
       return { ...prev, location: location };
     });
+  };
+
+  const secondsToMinSec = (totalSeconds: number) => {
+    // 1. If unit is miles, we scale the pace (seconds per km -> seconds per mile)
+    // A 5:00/km pace becomes ~8:03/mi
+    const adjustedSeconds =
+      unit === "mi" ? Math.round(totalSeconds * MI_TO_KM) : totalSeconds;
+
+    const min = Math.floor(adjustedSeconds / 60);
+    const sec = adjustedSeconds % 60;
+
+    return { min, sec };
+  };
+
+  const toTotalSeconds = (min: number, sec: number) => {
+    const total = min * 60 + sec;
+
+    // 2. If the user is typing in 'Miles' mode, we must convert BACK
+    // to 'Seconds per KM' before saving to the database/state.
+    return unit === "mi" ? Math.round(total / MI_TO_KM) : total;
   };
 
   const toggleUnit = () => setUnit(unit === "km" ? "mi" : "km");
@@ -165,7 +195,12 @@ export default function Settings() {
                     Min Distance
                   </p>
                   <p className="text-foreground font-medium">
-                    {draftProfile.minDist} {unit}
+                    {profile
+                      ? unit === "mi"
+                        ? kmToMi(profile.minDistance).toFixed(1)
+                        : profile.minDistance
+                      : "No distance available."}{" "}
+                    {unit}
                   </p>
                 </div>
               </div>
@@ -176,7 +211,12 @@ export default function Settings() {
                     Max Distance
                   </p>
                   <p className="text-foreground font-medium">
-                    {draftProfile.maxDist} {unit}
+                    {profile
+                      ? unit === "mi"
+                        ? kmToMi(profile.maxDistance).toFixed(1)
+                        : profile.maxDistance
+                      : "No distance available."}{" "}
+                    {unit}
                   </p>
                 </div>
               </div>
@@ -187,10 +227,13 @@ export default function Settings() {
                 <Clock className="w-5 h-5 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground mb-0.5">
-                    Pace Goal
+                    Min Pace
                   </p>
                   <p className="text-foreground font-medium">
-                    {draftProfile.maxPace} / {unit}
+                    {profile
+                      ? `${secondsToMinSec(profile.minPace).min}:${String(secondsToMinSec(profile.minPace).sec).padStart(2, "0")}`
+                      : "No Pace available."}{" "}
+                    / {unit}
                   </p>
                 </div>
               </div>
@@ -198,10 +241,13 @@ export default function Settings() {
                 <Clock className="w-5 h-5 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground mb-0.5">
-                    Pace Goal
+                    Max Pace
                   </p>
                   <p className="text-foreground font-medium">
-                    {draftProfile.maxPace} / {unit}
+                    {profile
+                      ? `${secondsToMinSec(profile.maxPace).min}:${String(secondsToMinSec(profile.maxPace).sec).padStart(2, "0")}`
+                      : "No Pace available."}{" "}
+                    / {unit}
                   </p>
                 </div>
               </div>
@@ -228,20 +274,19 @@ export default function Settings() {
             </button>
             <h2 className="text-xl font-bold mb-6">Edit Preferences</h2>
             <form onSubmit={handleSave} className="space-y-5">
-              {/* Location Input*/}
+              {/* Location Input */}
               <div>
                 <label className="flex items-center gap-2 text-card-foreground mb-2 text-sm">
                   <MapPin className="w-4 h-4" /> Location
                 </label>
                 <PlaceAutocomplete onPlaceSelect={setLocation} />
               </div>
-
+              {/* Distance Input */}
               <div>
                 <label className="flex items-center gap-2 text-card-foreground mb-2 text-sm">
                   <Target className="w-5 h-5 text-muted-foreground shrink-0" />
-                  <Clock className="w-4 h-4" /> Pace Goal —{" "}
-                  <span className="font-semibold text-primary">
-                    {draftProfile.minPace} / {unit}
+                  <span className="font-semibold text-muted-foreground">
+                    Distance
                   </span>
                 </label>
                 <div className="flex items-center gap-2">
@@ -256,42 +301,110 @@ export default function Settings() {
                     }
                     className="w-20 px-3 py-2 bg-input-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
-                  <span className="text-muted-foreground">:</span>
-                  {/*         <input
-                    type="number"
-                    min="0"
-                    max="59"
-                    value={draftPaceDisplay.split(":")[1] ?? ""}
-                    onChange={(e) => {
-                      const mins = draftPaceDisplay.split(":")[0] ?? "0";
-                      setDraftPaceDisplay(
-                        `${mins}:${e.target.value.padStart(2, "0")}`,
-                      );
-                    }}
-                    className="w-20 px-3 py-2 bg-input-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    required
-                  /> */}
                   <span className="text-muted-foreground text-sm whitespace-nowrap">
-                    / {unit}
+                    {unit}
+                  </span>
+
+                  <span className="font-semibold text-muted-foreground text-m whitespace-nowrap px-2">
+                    to
+                  </span>
+                  <input
+                    type="number"
+                    value={draftProfile.maxDist}
+                    onChange={(e) =>
+                      setDraftProfile({
+                        ...draftProfile,
+                        maxDist: Number(e.target.value),
+                      })
+                    }
+                    className="w-20 px-3 py-2 bg-input-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <span className="text-muted-foreground text-sm whitespace-nowrap">
+                    {unit}
                   </span>
                 </div>
               </div>
 
+              {/* Pace Input */}
               <div>
                 <label className="flex items-center gap-2 text-card-foreground mb-2 text-sm">
-                  <Calendar className="w-4 h-4" /> Runs Per Week
+                  <Clock className="w-5 h-5 text-muted-foreground shrink-0" />
+                  <span className="font-semibold text-muted-foreground">
+                    Pace
+                  </span>
                 </label>
-                {/* <select
-                  value={draftRuns}
-                  onChange={(e) => setDraftRuns(e.target.value)}
-                  className="w-full px-4 py-2 bg-input-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  {["1", "2", "3", "4", "5", "6", "7"].map((n) => (
-                    <option key={n} value={n}>
-                      {n} run{n !== "1" ? "s" : ""} per week
-                    </option>
-                  ))}
-                </select> */}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    value={secondsToMinSec(draftProfile.minPace).min}
+                    onChange={(e) => {
+                      const { sec } = secondsToMinSec(draftProfile.minPace);
+                      const newTotal = toTotalSeconds(
+                        Number(e.target.value),
+                        sec,
+                      );
+                      setDraftProfile({ ...draftProfile, minPace: newTotal });
+                    }}
+                    className="w-14 px-3 py-2 bg-input-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <span className="text-muted-foreground text-sm whitespace-nowrap">
+                    :
+                  </span>
+
+                  <input
+                    type="number"
+                    value={secondsToMinSec(draftProfile.minPace).sec}
+                    onChange={(e) => {
+                      const { min } = secondsToMinSec(draftProfile.minPace);
+                      const newTotal = toTotalSeconds(
+                        min,
+                        Number(e.target.value),
+                      );
+                      setDraftProfile({ ...draftProfile, minPace: newTotal });
+                    }}
+                    className="w-14 px-3 py-2 bg-input-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <span className="text-muted-foreground text-sm whitespace-nowrap">
+                    {unit}
+                  </span>
+
+                  <span className="font-semibold text-muted-foreground text-m whitespace-nowrap px-2">
+                    to
+                  </span>
+                  <input
+                    type="number"
+                    value={secondsToMinSec(draftProfile.maxPace).min}
+                    onChange={(e) => {
+                      const { sec } = secondsToMinSec(draftProfile.maxPace);
+                      const newTotal = toTotalSeconds(
+                        Number(e.target.value),
+                        sec,
+                      );
+                      setDraftProfile({ ...draftProfile, maxPace: newTotal });
+                    }}
+                    className="w-14 px-3 py-2 bg-input-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <span className="text-muted-foreground text-sm whitespace-nowrap">
+                    :
+                  </span>
+
+                  <input
+                    type="number"
+                    value={secondsToMinSec(draftProfile.maxPace).sec}
+                    onChange={(e) => {
+                      const { min } = secondsToMinSec(draftProfile.maxPace);
+                      const newTotal = toTotalSeconds(
+                        min,
+                        Number(e.target.value),
+                      );
+                      setDraftProfile({ ...draftProfile, maxPace: newTotal });
+                    }}
+                    className="w-14 px-3 py-2 bg-input-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <span className="text-muted-foreground text-sm whitespace-nowrap">
+                    {unit}
+                  </span>
+                </div>
               </div>
 
               <div className="flex gap-3 pt-1">
