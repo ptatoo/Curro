@@ -5,8 +5,8 @@ import { useRuns } from "../context/RunContext";
 import type { RunGroup, RunRoute } from "../types/runTypes";
 import { useEffect, useState } from "react";
 import StaticRouteMap from "../components/RouteMap";
-import { route3 } from "../services/routes";
 import { useUser } from "../context/UserContext";
+import LobbyRouterCreater from "../components/LobbyRouterCreater";
 
 export default function Lobbies() {
   const navigate = useNavigate();
@@ -88,45 +88,6 @@ export default function Lobbies() {
     setSelectedLobby(null);
   };
 
-  useEffect(() => {
-    addRun({
-      id: 1,
-      creatorId: 123456789,
-      routeId: 1,
-      startTime: new Date(),
-      targetPace: 10.6789,
-      maxPlayers: 20,
-      playerIds: [17, 38],
-      isPrivate: false,
-      status: "open",
-    } as RunGroup);
-    addRun({
-      id: 2,
-      creatorId: 124356789,
-      startTime: new Date(),
-      routeId: 2,
-      targetPace: 7.6789,
-      maxPlayers: 10,
-      playerIds: [17, 38, 57],
-      isPrivate: false,
-      status: "open",
-    } as RunGroup);
-  }, [publicRuns]);
-  useEffect(() => {
-    addRoute({
-      id: 1,
-      name: "Morning 5K Run",
-      route: route3,
-      distance: 5,
-    } as RunRoute);
-    addRoute({
-      id: 2,
-      name: "Evening Trail Run",
-      route: route3,
-      distance: 2,
-    } as RunRoute);
-  }, []);
-
   const availableRuns = publicRuns.filter((r) => !isOwner(r));
   const selectedRoute = selectedLobby
     ? runRoutes.find((r) => r.id === selectedLobby.routeId)
@@ -136,6 +97,7 @@ export default function Lobbies() {
 
   return (
     <div className="min-h-screen bg-background p-6">
+      <LobbyRouterCreater />
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <button
@@ -251,9 +213,19 @@ export default function Lobbies() {
               </p>
             </div>
 
-            <div className="w-full h-32 bg-muted border border-border rounded-lg mb-4 flex flex-col items-center justify-center gap-2">
-              <Map className="w-8 h-8 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">Map unavailable</p>
+            <div className="w-full h-64 bg-muted border border-border rounded-lg mb-4 flex flex-col items-center justify-center gap-2">
+              {selectedRoute ? (
+                <StaticRouteMap
+                  route={selectedRoute ? selectedRoute.route : []}
+                />
+              ) : (
+                <>
+                  <Map className="w-8 h-8 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    Map unavailable
+                  </p>
+                </>
+              )}
             </div>
 
             {isOwner(selectedLobby) ? (
