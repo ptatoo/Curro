@@ -5,7 +5,7 @@ export type RunStatus = 'open' | 'active' | 'completed';
 
 export interface RunGroup {
   id: number;
-  creatorId: string;
+  creatorId: number;
   routeId: number;
   startTime: Date;
   targetPace: number;

@@ -19,7 +19,8 @@ export default function Lobbies() {
     setPrivateRuns,
     addRoute,
     addRun,
- , removeRun } = useRuns();
+    removeRun,
+  } = useRuns();
   const { profile } = useUser();
 
   const [selectedLobby, setSelectedLobby] = useState<RunGroup | null>(null);
@@ -32,7 +33,10 @@ export default function Lobbies() {
     if (exists2) return true;
     return false;
   };
-  const isOwner = (run: RunGroup) => run.creatorId === CURRENT_USER_ID;
+  const isOwner = (run: RunGroup): boolean => {
+    if (!profile) return false;
+    return run.creatorId === profile.uid;
+  };
 
   const handleJoin = (run: RunGroup) => {
     if (!profile?.uid) return;
@@ -87,7 +91,7 @@ export default function Lobbies() {
   useEffect(() => {
     addRun({
       id: 1,
-      creatorId: "alex id of doom",
+      creatorId: 123456789,
       routeId: 1,
       startTime: new Date(),
       targetPace: 10.6789,
@@ -98,7 +102,7 @@ export default function Lobbies() {
     } as RunGroup);
     addRun({
       id: 2,
-      creatorId: "alex id of doom",
+      creatorId: 124356789,
       startTime: new Date(),
       routeId: 2,
       targetPace: 7.6789,
@@ -123,7 +127,6 @@ export default function Lobbies() {
     } as RunRoute);
   }, []);
 
-  const joinedRuns = publicRuns.filter((r) => joinedRunIds.includes(r.id) || isOwner(r));
   const availableRuns = publicRuns.filter((r) => !isOwner(r));
   const selectedRoute = selectedLobby
     ? runRoutes.find((r) => r.id === selectedLobby.routeId)
@@ -167,7 +170,8 @@ export default function Lobbies() {
                       <div>
                         <p className="font-medium">{route?.name ?? "Run"}</p>
                         <p className="text-sm text-muted-foreground">
-                          {run.startTime.toLocaleString()} · {route?.distance} km · pace {run.targetPace.toFixed(1)}
+                          {run.startTime.toLocaleString()} · {route?.distance}{" "}
+                          km · pace {run.targetPace.toFixed(1)}
                         </p>
                       </div>
                     </div>
@@ -232,10 +236,19 @@ export default function Lobbies() {
             </h2>
 
             <div className="bg-background border border-border rounded-lg p-4 space-y-2 mb-4">
-              <p><b>Distance:</b> {selectedRoute?.distance} km</p>
-              <p><b>Start Time:</b> {selectedLobby.startTime.toLocaleString()}</p>
-              <p><b>Pace:</b> {selectedLobby.targetPace.toFixed(1)} min/km</p>
-              <p><b>Participants:</b> {selectedLobby.playerIds.length} / {selectedLobby.maxPlayers}</p>
+              <p>
+                <b>Distance:</b> {selectedRoute?.distance} km
+              </p>
+              <p>
+                <b>Start Time:</b> {selectedLobby.startTime.toLocaleString()}
+              </p>
+              <p>
+                <b>Pace:</b> {selectedLobby.targetPace.toFixed(1)} min/km
+              </p>
+              <p>
+                <b>Participants:</b> {selectedLobby.playerIds.length} /{" "}
+                {selectedLobby.maxPlayers}
+              </p>
             </div>
 
             <div className="w-full h-32 bg-muted border border-border rounded-lg mb-4 flex flex-col items-center justify-center gap-2">
