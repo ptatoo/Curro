@@ -6,7 +6,10 @@ interface PolylineProps {
   color?: string;
 }
 
-export const RoutePolyline = ({ points, color = "var(--route-color)" }: PolylineProps) => {
+export const RoutePolyline = ({
+  points,
+  color = "var(--route-color)",
+}: PolylineProps) => {
   const map = useMap();
   const mapsLib = useMapsLibrary("maps");
 
@@ -16,9 +19,33 @@ export const RoutePolyline = ({ points, color = "var(--route-color)" }: Polyline
     if (!mapsLib) return null;
 
     return new google.maps.Polyline({
-      strokeColor: color,
+      strokeColor: "black",
       strokeOpacity: 1.0,
       strokeWeight: 4,
+      icons: [
+        {
+          // Start Indicator (Circle)
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 5,
+            fillOpacity: 1,
+            fillColor: "white",
+            strokeColor: "green",
+          },
+          offset: "0%",
+        },
+        {
+          // End Indicator (Arrow or specialized symbol)
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 5,
+            fillOpacity: 1,
+            fillColor: "white",
+            strokeColor: "red",
+          },
+          offset: "100%",
+        },
+      ],
     });
   }, [mapsLib, color]); // Re-run when mapsLib is available
 
