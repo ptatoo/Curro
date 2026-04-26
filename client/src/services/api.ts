@@ -5,7 +5,7 @@ Description: Sends Google Auth Code to Backend.
 Param: Code
 Return: JWT
  */
-export const fetchAccessToken = async (code: string): Promise<string> => {
+export const fetchJwtToken = async (code: string): Promise<string> => {
     //TODO: MAKE THIS WORK
   const response = await fetch(`${BACKEND_URL}/api/auth/google`, {
     method: "POST",

@@ -38,8 +38,11 @@ const useRoute = (handler) => async (req, res, next) => {
   try {
     await handler(req, res);
   } catch (error) {
-    console.error(`Error in ${req.method} ${req.originalUrl}:`, error.message);
-    res.status(500).json({ error: error.message || 'Internal Server Error' });
+    // This logs the specific reason from Google (e.g., "redirect_uri_mismatch")
+    const detail = error.response?.data || error.message;
+    console.error(`Detailed Error in ${req.method} ${req.originalUrl}:`, detail);
+    
+    res.status(500).json({ error: detail });
   }
 };
 ``
@@ -48,7 +51,10 @@ app.post('/api/auth/google', useRoute(async (req, res) => {
   if (!code) return res.status(400).json({ error: 'No code provided' });
 
   // 3. This will now work without throwing a redirect_uri mismatch
-  const { tokens } = await oAuth2ClientWeb.getToken(code);
+  const { tokens } = await oAuth2ClientWeb.getToken({
+    code: code,
+    redirect_uri: process.env.REDIRECT_URI
+  });
   
   const ticket = await oAuth2ClientWeb.verifyIdToken({
     idToken: tokens.id_token,
@@ -66,14 +72,10 @@ app.post('/api/auth/google', useRoute(async (req, res) => {
   res.status(200).json(sessionData);
 }));
 
-
-
 app.post('/api/test-get-jwt', authenticate, useRoute(async (req, res) => {
   console.log(req.userId);
   res.status(200).json(req.userId);
 }));    
-
-
 
 app.post('/api/auth/google', useRoute(async (req, res) => {
   const { code } = req.body;

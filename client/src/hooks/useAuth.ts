@@ -1,6 +1,6 @@
 import { useGoogleLogin } from '@react-oauth/google';
 import { useUser } from '../context/UserContext';
-import { fetchAccessToken } from '../services/api';
+import { fetchJwtToken } from '../services/api';
 
 export const useAuth = () => {
   const { setJwtToken } = useUser();
@@ -9,7 +9,7 @@ export const useAuth = () => {
     onSuccess: async (codeResponse) => {
       try {
         // Send google's oauth code to backend for accessToken
-        const token = await fetchAccessToken(codeResponse.code);
+        const token = await fetchJwtToken(codeResponse.code);
         
         // 3. Store in Global Context
         setJwtToken(token);
