@@ -7,6 +7,7 @@ import RunProgressChart from "../components/RunProgressChart";
 import { useUnit } from "../context/UnitContext";
 
 export default function Dashboard() {
+  
   const navigate = useNavigate();
   const { unit, formatDistance, formatPace, distanceLabel } = useUnit();
 

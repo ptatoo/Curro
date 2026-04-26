@@ -5,15 +5,15 @@ db.pragma('foreign_keys = ON');
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS userInfo (
-    id TEXT PRIMARY KEY NOT NULL,
+    uid TEXT PRIMARY KEY NOT NULL, 
     googleId TEXT UNIQUE NOT NULL,
     email TEXT UNIQUE NOT NULL,
     name TEXT NOT NULL,
-    bio TEXT DEFAULT '',
-    location TEXT NULL,
-    pace_avg REAL DEFAULT -1,
-    dist_pref REAL DEFAULT -1,
-    total_runs INTEGER DEFAULT 0
+    minDistance REAL DEFAULT 0,
+    maxDistance REAL DEFAULT 0,
+    minPace REAL DEFAULT 0,
+    maxPace REAL DEFAULT 0,
+    location TEXT DEFAULT N
   );
 
   CREATE TABLE IF NOT EXISTS lobbies (
@@ -25,7 +25,7 @@ db.exec(`
     target_pace REAL,
     is_private BOOLEAN,
     status TEXT,
-    FOREIGN KEY (creator_id) REFERENCES userInfo(id),
+    FOREIGN KEY (creator_id) REFERENCES userInfo(uid),
     FOREIGN KEY (route_id) REFERENCES routes(id)
   );
 
@@ -34,26 +34,28 @@ db.exec(`
     user_id TEXT NOT NULL,
     PRIMARY KEY (lobby_id, user_id),
     FOREIGN KEY (lobby_id) REFERENCES lobbies(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES userInfo(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES userInfo(uid) ON DELETE CASCADE
   );
 `);
-/*
-  CREATE TABLE IF NOT EXISTS routes (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    start_coord TEXT NOT NULL,
-    end_coord TEXT NOT NULL,
-    distance REAL,
-    map_polyline TEXT
-  );
-*/
-// COMMENTED OUT, ROUTES WILL BE IMPLEMENTED IN THE FUTURE when routes get impleented
 
+// 2. UPDATED DB METHODS
 const Users = {
-  create: (user) => db.prepare(`INSERT INTO userInfo (id, googleId, email, name) VALUES (@id, @googleId, @email, @name)`).run(user),
-  getById: (id) => db.prepare(`SELECT * FROM userInfo WHERE id = ?`).get(id),
-  updateProfile: (data) => db.prepare(`UPDATE userInfo SET bio = @bio, pace_avg = @pace_avg, dist_pref = @dist_pref WHERE id = @id`).run(data),
-  updateSettings: (data) => db.prepare(`UPDATE userInfo SET location = @location, pace_avg = @pace_avg, dist_pref = @dist_pref WHERE id = @id`).run(data)
+  create: (user) => db.prepare(`
+    INSERT INTO userInfo (uid, googleId, email, name) 
+    VALUES (@uid, @googleId, @email, @name)
+  `).run(user),
+  
+  getById: (uid) => db.prepare(`SELECT * FROM userInfo WHERE uid = ?`).get(uid),
+  
+  updateSettings: (data) => db.prepare(`
+    UPDATE userInfo 
+    SET location = @location, 
+        minDistance = @minDistance, 
+        maxDistance = @maxDistance, 
+        minPace = @minPace, 
+        maxPace = @maxPace 
+    WHERE uid = @uid
+  `).run(data)
 };
 
 /*
