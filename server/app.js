@@ -11,7 +11,8 @@ app.use(express.json());
 
 const oAuth2ClientWeb = new OAuth2Client(
   process.env.CLIENT_ID, 
-  process.env.CLIENT_SECRET
+  process.env.CLIENT_SECRET,
+  'postmessaage'
 );
 
 // --- Middleware ---
@@ -41,13 +42,14 @@ const useRoute = (handler) => async (req, res, next) => {
     res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 };
-
-// --- Routes ---
-app.post('/api/google-exchange', useRoute(async (req, res) => {
+``
+app.post('/api/auth/google', useRoute(async (req, res) => {
   const { code } = req.body;
   if (!code) return res.status(400).json({ error: 'No code provided' });
 
+  // 3. This will now work without throwing a redirect_uri mismatch
   const { tokens } = await oAuth2ClientWeb.getToken(code);
+  
   const ticket = await oAuth2ClientWeb.verifyIdToken({
     idToken: tokens.id_token,
     audience: process.env.CLIENT_ID,
@@ -64,10 +66,51 @@ app.post('/api/google-exchange', useRoute(async (req, res) => {
   res.status(200).json(sessionData);
 }));
 
+
+
 app.post('/api/test-get-jwt', authenticate, useRoute(async (req, res) => {
   console.log(req.userId);
   res.status(200).json(req.userId);
+}));    
+
+
+
+app.post('/api/auth/google', useRoute(async (req, res) => {
+  const { code } = req.body;
+  if (!code) return res.status(400).json({ error: 'No code provided' });
+
+  const { tokens } = await oAuth2ClientWeb.getToken(code);
+  const ticket = await oAuth2ClientWeb.verifyIdToken({
+    idToken: tokens.id_token,
+    audience: process.env.CLIENT_ID,
+  });
+
+  const { sub: googleId, email, name } = ticket.getPayload();
+  
+  const existingUser = Users.getById(googleId);
+  if (!existingUser) {
+    Users.create({ id: googleId, googleId, email, name });
+  }
+
+  const sessionData = getJWTToken(googleId);
+  res.status(200).json(sessionData);
 }));
+
+
+
+//TESTESTSETSETSETSETSETSETSETSSETSETSETSETAETSETSETAETSETSETAETSETSETAETSETSETAETSETSETAETSETSETA
+app.get('/test-auth', authenticate, useRoute(async (req, res) => {
+  console.log(req.userId);
+  res.status(200).json({ success: true, message: "JWT is valid", user: req.userId });
+}));
+
+app.get('/test', useRoute(async (req, res) => {
+  console.log(req.userId);
+  res.status(200).json({ success: true, message: "valid asf", user: req.userId });
+}));
+//TESTESTSETSETSETSETSETSETSETSSETSETSETSETAETSETSETAETSETSETAETSETSETAETSETSETAETSETSETAETSETSETA
+
+
 
 // LISTENNING INGINGINGINGINGIGN IGNGINIGN IGNGIN IGGIGIGINGINGINGINGINGINGINGINGINGIG
 const PORT = process.env.PORT || 3000;

@@ -1,17 +1,17 @@
 const sqlite = require('better-sqlite3');
-const appDb = new sqlite('data/appDb.db');
+const db = new sqlite('data/appDb.db');
 
 // Enable foreign keys
-appDb.pragma('foreign_keys = ON');
+db.pragma('foreign_keys = ON');
 
 // Initialize schema
-appDb.exec(`
+db.exec(`
   CREATE TABLE IF NOT EXISTS userInfo (
     id TEXT PRIMARY KEY NOT NULL,
     googleId TEXT UNIQUE NOT NULL,
     email TEXT UNIQUE NOT NULL,
     name TEXT NOT NULL,
-    bio TEXT DEFAULT -1,
+    bio TEXT DEFAULT 's',
     pace_avg REAL DEFAULT -1,
     dist_pref REAL DEFAULT -1,
     reliability_rating REAL DEFAULT 1.0

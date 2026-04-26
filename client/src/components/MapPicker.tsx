@@ -1,6 +1,12 @@
-import { useState } from "react";
-import { APIProvider, Map, AdvancedMarker } from "@vis.gl/react-google-maps";
+import { useState, useCallback } from "react";
+import {
+  APIProvider,
+  Map,
+  AdvancedMarker,
+  useMap,
+} from "@vis.gl/react-google-maps";
 import type { MapMouseEvent } from "@vis.gl/react-google-maps";
+import PlaceAutocomplete from "./PlaceAutocomplete";
 
 interface Props {
   onLocationSelect: (lat: number, lng: number) => void;
@@ -9,6 +15,7 @@ interface Props {
 const MapPicker = ({ onLocationSelect }: Props) => {
   // Default center (e.g., Los Angeles)
   const [markerPos, setMarkerPos] = useState({ lat: 34.0522, lng: -118.2437 });
+  //const map = useMap();
 
   const handleMapClick = (e: MapMouseEvent) => {
     if (e.detail.latLng) {
@@ -28,14 +35,7 @@ const MapPicker = ({ onLocationSelect }: Props) => {
       }}
     >
       <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
-        <Map
-          defaultCenter={markerPos}
-          defaultZoom={13}
-          onClick={handleMapClick}
-          mapId="YOUR_MAP_ID" // Required for AdvancedMarkers
-        >
-          <AdvancedMarker position={markerPos} />
-        </Map>
+        <PlaceAutocomplete onPlaceSelect={() => {}} />
       </APIProvider>
     </div>
   );
