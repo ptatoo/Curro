@@ -6,15 +6,16 @@ interface RunProgressChartProps {
 
 export default function RunProgressChart({ data }: RunProgressChartProps) {
   return (
-    <div className="bg-card border border-border rounded-lg p-4">
-      <h3 className="text-card-foreground mb-4">Weekly Progress</h3>
+    <div className="bg-card border border-border rounded-lg p-4 px-2">
+      <h3 className="text-card-foreground mb-4 px-2">Weekly Progress</h3>
       <ResponsiveContainer width="100%" height={250}>
-        <BarChart data={data}>
+        <BarChart data={data} margin={{ left: -10, right: 10 }} barCategoryGap="30%">
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" key="grid" />
           <XAxis
             dataKey="date"
             stroke="var(--muted-foreground)"
             tick={{ fill: "var(--muted-foreground)" }}
+            interval={0}
             key="xaxis"
           />
           <YAxis
@@ -35,6 +36,7 @@ export default function RunProgressChart({ data }: RunProgressChartProps) {
             dataKey="distance"
             fill="var(--primary)"
             radius={[4, 4, 0, 0]}
+            barSize={25}
           />
         </BarChart>
       </ResponsiveContainer>
