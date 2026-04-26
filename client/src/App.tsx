@@ -3,6 +3,7 @@ import { UserProvider } from "./context/UserContext";
 import { RunProvider } from "./context/RunContext";
 import { UnitProvider } from "./context/UnitContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { APIProvider } from "@vis.gl/react-google-maps";
 
 import Navbar from "./components/Navbar";
 

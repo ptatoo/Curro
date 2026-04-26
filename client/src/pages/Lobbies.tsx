@@ -74,7 +74,6 @@ export default function Lobbies() {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto">
-
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <button
@@ -91,10 +90,6 @@ export default function Lobbies() {
             Create Lobby
           </button>
         </div>
-
-        <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
-          <StaticRouteMap />
-        </APIProvider>
 
         {/* My Runs Section */}
         {joinedRuns.length > 0 && (
@@ -113,7 +108,8 @@ export default function Lobbies() {
                       <div>
                         <p className="font-medium">{route?.name ?? "Run"}</p>
                         <p className="text-sm text-muted-foreground">
-                          {run.startTime.toLocaleString()} · {route?.distance} km · pace {run.targetPace.toFixed(1)}
+                          {run.startTime.toLocaleString()} · {route?.distance}{" "}
+                          km · pace {run.targetPace.toFixed(1)}
                         </p>
                       </div>
                     </div>
@@ -171,11 +167,24 @@ export default function Lobbies() {
             </h2>
 
             <div className="bg-background border border-border rounded-lg p-6 space-y-3 mb-6">
-              <p><b>Distance:</b> {selectedRoute?.distance} km</p>
-              <p><b>Start Time:</b> {selectedLobby.startTime.toLocaleString()}</p>
-              <p><b>Pace:</b> {selectedLobby.targetPace.toFixed(1)} min/km</p>
-              <p><b>Participants:</b> {selectedLobby.numPlayers} / {selectedLobby.maxPlayers}</p>
+              <p>
+                <b>Distance:</b> {selectedRoute?.distance} km
+              </p>
+              <p>
+                <b>Start Time:</b> {selectedLobby.startTime.toLocaleString()}
+              </p>
+              <p>
+                <b>Pace:</b> {selectedLobby.targetPace.toFixed(1)} min/km
+              </p>
+              <p>
+                <b>Participants:</b> {selectedLobby.numPlayers} /{" "}
+                {selectedLobby.maxPlayers}
+              </p>
             </div>
+
+            {/* <StaticRouteMap
+              route={selectedRoute?.route === null ? selectedRoute.route : "{}"}
+            /> */}
 
             {isJoined(selectedLobby) ? (
               <div className="flex flex-col items-center gap-3">
