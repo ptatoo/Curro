@@ -3,15 +3,15 @@ import { UserProvider } from "./context/UserContext";
 import { RunProvider } from "./context/RunContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
-// Components
 import Navbar from "./components/Navbar";
 
-// Pages - Removed curly braces for default exports
 import Dashboard from "./pages/Dashboard";
 import Lobbies from "./pages/Lobbies";
 import Login from "./pages/Login";
 import NewUser from "./pages/NewUser";
 import Settings from "./pages/Settings";
+import LobbyDetail from "./pages/LobbyDetail";
+import CreateLobby from "./pages/CreateLobby";
 
 function App() {
   return (
@@ -19,7 +19,6 @@ function App() {
       <UserProvider>
         <RunProvider>
           <BrowserRouter>
-            {/* Navbar stays visible on all pages */}
             <Navbar />
 
             <main style={{ padding: "20px" }}>
@@ -27,10 +26,14 @@ function App() {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/lobbies" element={<Lobbies />} />
+
+                {/* ✅ ADD THIS */}
+                <Route path="/lobby/new" element={<CreateLobby />} />
+
+                <Route path="/lobby/:id" element={<LobbyDetail />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/newUser" element={<NewUser />} />
 
-                {/* 404 Page */}
                 <Route path="*" element={<h2>404 - Not Found</h2>} />
               </Routes>
             </main>
