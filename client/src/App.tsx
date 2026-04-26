@@ -10,7 +10,7 @@ import Lobbies from "./pages/Lobbies";
 import Login from "./pages/Login";
 import NewUser from "./pages/NewUser";
 import Settings from "./pages/Settings";
-import LobbyDetail from "./pages/LobbyDetail";
+// import LobbyDetail from "./pages/LobbyDetail";
 import CreateLobby from "./pages/CreateLobby";
 
 function App() {
@@ -26,11 +26,8 @@ function App() {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/lobbies" element={<Lobbies />} />
-
-                {/* ✅ ADD THIS */}
                 <Route path="/lobby/new" element={<CreateLobby />} />
 
-                <Route path="/lobby/:id" element={<LobbyDetail />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/newUser" element={<NewUser />} />
 

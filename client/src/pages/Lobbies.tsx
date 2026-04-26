@@ -1,4 +1,4 @@
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, X, CheckCircle } from "lucide-react";
 import { LobbyCard } from "../components/LobbyCard";
 import { useNavigate } from "react-router-dom";
 import { useRuns } from "../context/RunContext";
@@ -62,7 +62,6 @@ export default function Lobbies() {
           >
             <ArrowLeft className="w-6 h-6 text-foreground" />
           </button>
-
           <button
             onClick={() => navigate("/lobby/new")}
             className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg"
@@ -91,6 +90,60 @@ export default function Lobbies() {
           })}
         </div>
       </div>
+
+      {/* Modal */}
+      {selectedLobby && (
+        <div
+          className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center"
+          onClick={() => setSelectedLobby(null)}
+        >
+          <div
+            className="bg-card border border-border rounded-2xl p-8 max-w-md w-full mx-4 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setSelectedLobby(null)}
+              className="absolute top-4 right-4 p-1 hover:bg-accent rounded-lg"
+            >
+              <X className="w-5 h-5 text-muted-foreground" />
+            </button>
+
+            <h2 className="text-xl font-bold mb-6">{selectedLobby.name}</h2>
+
+            <div className="bg-background border border-border rounded-lg p-6 space-y-3 mb-6">
+              <p><b>Location:</b> {selectedLobby.location}</p>
+              <p><b>Time:</b> {selectedLobby.time}</p>
+              <p><b>Distance:</b> {selectedLobby.distance}</p>
+              <p><b>Participants:</b> {selectedLobby.participants} / {selectedLobby.maxParticipants}</p>
+            </div>
+
+            {isJoined(selectedLobby) ? (
+              <div className="flex flex-col items-center gap-3">
+                <div className="flex items-center gap-2 text-primary font-medium">
+                  <CheckCircle className="w-5 h-5" />
+                  You've joined this run
+                </div>
+                <button
+                  onClick={() => {
+                    handleLeave(selectedLobby);
+                    setSelectedLobby(null);
+                  }}
+                  className="w-full py-3 border border-destructive text-destructive font-semibold rounded-xl hover:bg-destructive/10 transition-colors"
+                >
+                  Leave Run
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => handleJoin(selectedLobby)}
+                className="w-full py-3 bg-primary text-primary-foreground font-semibold rounded-xl hover:opacity-90 transition-opacity"
+              >
+                Join Run
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
