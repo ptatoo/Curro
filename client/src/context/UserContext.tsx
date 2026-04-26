@@ -22,7 +22,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   });
 
   //----------------------------------
-  //2. syncs actual state to local storge
+  //2. syncs actual state to local storge 
   useEffect(() => {
     if (jwtToken) {
       localStorage.setItem("app_jwt_token", jwtToken);
@@ -55,7 +55,13 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   //----------------------------------
   //3. update userProfile
   const updateProfile = (updates: Partial<UserProfile>) => {
-    setProfile((prev) => (prev ? { ...prev, ...updates } : null));
+    setProfile((prev) => {
+      // If we have a profile, update it. If not, create a base object with the updates!
+      if (!prev) {
+        return { ...updates } as UserProfile;
+      }
+      return { ...prev, ...updates };
+    });
   };
 
   //----------------------------------
