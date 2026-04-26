@@ -93,8 +93,6 @@ export default function Lobbies() {
     ? runRoutes.find((r) => r.id === selectedLobby.routeId)
     : null;
 
-  console.log(selectedRoute);
-
   return (
     <div className="min-h-screen bg-background p-6">
       <LobbyRouterCreater />

@@ -97,14 +97,6 @@ export default function Settings() {
 
   const toggleUnit = () => setUnit(unit === "km" ? "mi" : "km");
 
-  // Display values derived from canonical km values
-  // const displayDistance =
-  //   unit === "km"
-  //     ? draftProfile.distanceGoalKm.toFixed(1)
-  //     : kmToMi(settings.distanceGoalKm).toFixed(1);
-  // const displayPace =
-  //   unit === "km" ? settings.paceGoalPerKm : paceKmToMi(settings.paceGoalPerKm);
-
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-3xl mx-auto">
@@ -218,7 +210,7 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Modal */}
+      {/* --- Modal --- */}
       {isEditing && (
         <div
           className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center"
@@ -245,41 +237,27 @@ export default function Settings() {
               </div>
 
               <div>
-                {/* <label className="flex items-center gap-2 text-card-foreground mb-2 text-sm">
-                  <Target className="w-4 h-4" /> Distance Goal —{" "}
-                  <span className="font-semibold text-primary">
-                    {draftDistance.toFixed(1)} {unit} / week
-                  </span>
-                </label> */}
-                <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground text-sm whitespace-nowrap">
-                    {unit} / week
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                {/* <label className="flex items-center gap-2 text-card-foreground mb-2 text-sm">
+                <label className="flex items-center gap-2 text-card-foreground mb-2 text-sm">
+                  <Target className="w-5 h-5 text-muted-foreground shrink-0" />
                   <Clock className="w-4 h-4" /> Pace Goal —{" "}
                   <span className="font-semibold text-primary">
-                    {secsToDisplay(draftPace)} / {unit}
+                    {draftProfile.minPace} / {unit}
                   </span>
-                </label> */}
+                </label>
                 <div className="flex items-center gap-2">
-                  {/* <input
+                  <input
                     type="number"
-                    min="0"
-                    max="59"
-                    value={draftPaceDisplay.split(":")[0] ?? ""}
-                    onChange={(e) => {
-                      const secs = draftPaceDisplay.split(":")[1] ?? "00";
-                      setDraftPaceDisplay(`${e.target.value}:${secs}`);
-                    }}
+                    value={draftProfile.minDist}
+                    onChange={(e) =>
+                      setDraftProfile({
+                        ...draftProfile,
+                        minDist: Number(e.target.value),
+                      })
+                    }
                     className="w-20 px-3 py-2 bg-input-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    required
                   />
                   <span className="text-muted-foreground">:</span>
-                  <input
+                  {/*         <input
                     type="number"
                     min="0"
                     max="59"
