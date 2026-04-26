@@ -1,24 +1,42 @@
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
 import type { RunGroup, RunContextType, RunStatus } from "../types/runTypes.ts";
+import type { RunRoute } from "../types/runTypes.ts";
 
 const RunContext = createContext<RunContextType | undefined>(undefined);
 
 export const RunProvider = ({ children }: { children: ReactNode }) => {
   const [publicRuns, setPublicRuns] = useState<RunGroup[]>([]);
   const [privateRuns, setPrivateRuns] = useState<RunGroup[]>([]);
+  const [routes, setRoutes] = useState<RunRoute[]>([]);
 
   // Helper: Adds a run to the correct list based on its privacy setting
   const addRun = (run: RunGroup) => {
     if (run.isPrivate) {
-      setPrivateRuns((prev) => [...prev, run]);
+      setPrivateRuns((prev) => {
+        const exists = prev.some((r) => r.id === run.id);
+        if (exists) return prev;
+        return [...prev, run];
+      });
     } else {
-      setPublicRuns((prev) => [...prev, run]);
+      setPublicRuns((prev) => {
+        const exists = prev.some((r) => r.id === run.id);
+        if (exists) return prev;
+        return [...prev, run];
+      });
     }
   };
 
+  const addRoute = (runRoute: RunRoute) => {
+    setRoutes((prev) => {
+      const exists = prev.some((r) => r.id === runRoute.id);
+      if (exists) return prev;
+      return [...prev, runRoute];
+    });
+  };
+
   // Helper: Find a run by ID and update its status
-  const updateRunStatus = (runId: string, status: RunStatus) => {
+  const updateRunStatus = (runId: number, status: RunStatus) => {
     const updater = (runs: RunGroup[]) =>
       runs.map((r) => (r.id === runId ? { ...r, status } : r));
 
@@ -31,10 +49,12 @@ export const RunProvider = ({ children }: { children: ReactNode }) => {
       value={{
         publicRuns,
         privateRuns,
+        runRoutes: routes,
         setPublicRuns,
         setPrivateRuns,
         addRun,
         updateRunStatus,
+        addRoute,
       }}
     >
       {children}
