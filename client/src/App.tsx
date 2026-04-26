@@ -10,7 +10,6 @@ import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
 import Lobbies from "./pages/Lobbies";
 import Login from "./pages/Login";
-import NewUser from "./pages/NewUser";
 import Settings from "./pages/Settings";
 import CreateLobby from "./pages/CreateLobby";
 
@@ -30,7 +29,6 @@ function App() {
                     <Route path="/lobbies" element={<Lobbies />} />
                     <Route path="/lobby/new" element={<CreateLobby />} />
                     <Route path="/settings" element={<Settings />} />
-                    <Route path="/newUser" element={<NewUser />} />
                     <Route path="*" element={<h2>404 - Not Found</h2>} />
                   </Routes>
                 </main>

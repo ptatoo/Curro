@@ -2,11 +2,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useRuns } from "../context/RunContext";
+import { useUser } from "../context/UserContext";
 
 export default function CreateLobby() {
+
   const navigate = useNavigate();
   const { addRun, addRoute, publicRuns, runRoutes } = useRuns();
-
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -23,18 +24,18 @@ export default function CreateLobby() {
     addRoute({
       id: newRouteId,
       name,
-      route: "{}",
+      route: [],
       distance: parseFloat(distance) || 0,
     });
 
     addRun({
       id: newRunId,
-      creatorId: "current-user",
+      creatorId: 1,
       routeId: newRouteId,
       startTime: new Date(`${date}T${time}`),
       targetPace: parseFloat(pace) || 0,
       maxPlayers: parseInt(maxParticipants),
-      numPlayers: 0,
+      playerIds: [],
       isPrivate: false,
       status: "open",
     });

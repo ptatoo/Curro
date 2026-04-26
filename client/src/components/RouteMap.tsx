@@ -28,7 +28,7 @@ export default function StaticRouteMap({ route }: { route: Coord[] }) {
         defaultZoom={14}
         mapId={"1"}
       >
-        <RoutePolyline points={route} color="#FF0000" />
+        <RoutePolyline points={route} color="var(--route-color)" />
       </Map>
     </div>
   );

@@ -9,7 +9,8 @@ export function WelcomeSection({ userName, onClick }: WelcomeSectionProps) {
   return (
     <button
       onClick={onClick}
-     className="w-full bg-gradient-to-b from-primary to-[#b8896a] rounded-lg p-6 text-primary-foreground hover:opacity-90 transition-opacity text-left"
+     className="w-full rounded-lg p-6 text-primary-foreground hover:opacity-90 transition-opacity text-left"
+style={{ background: "linear-gradient(to bottom, var(--primary), var(--accent))" }}
     >
       <div className="flex items-center justify-between">
         <div>

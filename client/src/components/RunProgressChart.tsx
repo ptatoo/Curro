@@ -34,7 +34,7 @@ export default function RunProgressChart({ data }: RunProgressChartProps) {
           <Bar
             key="bar"
             dataKey="distance"
-            fill="var(--primary)"
+            fill="var(--chart_color)"
             radius={[4, 4, 0, 0]}
             barSize={25}
           />

@@ -1,15 +1,18 @@
+import type { Dispatch } from "react";
+import type { SetStateAction } from "react";
+
 export interface UserProfile {
   uid: number;
   email: string;
   name: string;
 
   //ranges
-  minDistance: number; // Double
-  maxDistance: number; // Double
+  minDistance: number;
+  maxDistance: number;
 
   //ranges
-  minPace: number; // Double
-  maxPace: number; // Double
+  minPace: number;
+  maxPace: number;
 
   friends: string[];
   location: string | null;
@@ -20,7 +23,7 @@ export interface UserContextType {
   profile: UserProfile | null;
   // Functions to update the state
   setJwtToken: (token: string) => void;
-  setProfile: (profile: UserProfile) => void;
+  setProfile:  Dispatch<SetStateAction<UserProfile | null>>;
   updateProfile: (updates: Partial<UserProfile>) => void;
   logout: () => void;
 }
