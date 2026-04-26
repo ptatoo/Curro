@@ -8,10 +8,10 @@ import type { UserProfile } from "../types/authTypes.ts";
 const RunContext = createContext<LobbyContextType | undefined>(undefined);
 
 export const RunProvider = ({ children }: { children: ReactNode }) => {
-  const [publicRuns, setPublicRuns] = useState<Lobby[]>([]);
-  const [privateRuns, setPrivateRuns] = useState<Lobby[]>([]);
-  const [myPublicRuns, setMyPublicRuns] = useState<Lobby[]>([]);
-  const [myPrivateRuns, setMyPrivateRuns] = useState<Lobby[]>([]);
+  const [publicRuns, setPublicLobbies] = useState<Lobby[]>([]);
+  const [privateLobbiess, setPrivateLobbiess] = useState<Lobby[]>([]);
+  const [myPublicLobbies, setMyPublicLobbies] = useState<Lobby[]>([]);
+  const [myPrivateLobbiess, setMyPrivateLobbiess] = useState<Lobby[]>([]);
   const [routes, setRoutes] = useState<RunRoute[]>([]);
   const { profile } = useUser();
 
@@ -25,24 +25,24 @@ export const RunProvider = ({ children }: { children: ReactNode }) => {
     );
 
     // 3. Filter Private Runs
-    const userPrivate = privateRuns.filter((run) =>
+    const userPrivate = privateLobbiess.filter((run) =>
       run.playerIds.includes(profile.uid),
     );
 
     // 4. Update the "My Runs" states
-    setMyPublicRuns(userPublic);
-    setMyPrivateRuns(userPrivate);
-  }, [publicRuns, privateRuns, profile?.uid]);
+    setMyPublicLobbies(userPublic);
+    setMyPrivateLobbiess(userPrivate);
+  }, [publicRuns, privateLobbiess, profile?.uid]);
 
-  const addRun = (run: Lobby) => {
+  const addLobby = (run: Lobby) => {
     if (run.isPrivate) {
-      setPrivateRuns((prev) => {
+      setPrivateLobbiess((prev) => {
         const exists = prev.some((r) => r.id === run.id);
         if (exists) return prev;
         return [...prev, run];
       });
     } else {
-      setPublicRuns((prev) => {
+      setPublicLobbies((prev) => {
         const exists = prev.some((r) => r.id === run.id);
         if (exists) return prev;
         return [...prev, run];
@@ -50,9 +50,9 @@ export const RunProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const removeRun = (runId: number) => {
-    setPublicRuns((prev) => prev.filter((r) => r.id !== runId));
-    setPrivateRuns((prev) => prev.filter((r) => r.id !== runId));
+  const removeLobby = (runId: number) => {
+    setPublicLobbies((prev) => prev.filter((r) => r.id !== runId));
+    setPrivateLobbiess((prev) => prev.filter((r) => r.id !== runId));
   };
 
   const addRoute = (runRoute: RunRoute) => {
@@ -63,26 +63,26 @@ export const RunProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const updateRunStatus = (runId: number, status: RunStatus) => {
+  const updateLobbyStatus = (runId: number, status: RunStatus) => {
     const updater = (runs: Lobby[]) =>
       runs.map((r) => (r.id === runId ? { ...r, status } : r));
-    setPublicRuns(updater);
-    setPrivateRuns(updater);
+    setPublicLobbies(updater);
+    setPrivateLobbiess(updater);
   };
 
   return (
     <RunContext.Provider
       value={{
         publicRuns,
-        privateRuns,
+        privateLobbiess,
         runRoutes: routes,
-        myPublicRuns,
-        myPrivateRuns,
-        setPublicRuns,
-        setPrivateRuns,
-        addRun,
-        removeRun,
-        updateRunStatus,
+        myPublicLobbies,
+        myPrivateLobbiess,
+        setPublicLobbies,
+        setPrivateLobbiess,
+        addLobby,
+        removeLobby,
+        updateLobbyStatus,
         addRoute,
       }}
     >

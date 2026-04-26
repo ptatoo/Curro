@@ -4,28 +4,32 @@
   export type RunStatus = 'open' | 'active' | 'completed';
 
   export interface Lobby {
-    id: number;
-    creatorId: number;
+    id: number; // Changed to string for SQLite TEXT
+    creatorId: number
     routeId: number;
-    startTime: Date;
+    startTime: Date; // Dates often arrive as ISO strings from JSON
     targetPace: number;
     maxPlayers: number;
     playerIds: number[];
     isPrivate: boolean;
     status: RunStatus;
-  }
+    // Added from your getPublic() JOIN
+    route_name?: string;
+    distance?: number;
+    current_players?: number;
+}
 
   export interface LobbyContextType {
     publicRuns: Lobby[];
-    privateRuns: Lobby[];
-    myPublicRuns: Lobby[];
-    myPrivateRuns: Lobby[];
+    privateLobbiess: Lobby[];
+    myPublicLobbies: Lobby[];
+    myPrivateLobbiess: Lobby[];
     runRoutes: RunRoute[];
-    setPublicRuns: Dispatch<SetStateAction<Lobby[]>>
-    setPrivateRuns: Dispatch<SetStateAction<Lobby[]>>
-    addRun: (run: Lobby) => void;
-    removeRun: (runId: number) => void;
-    updateRunStatus: (runId: number, status: RunStatus) => void;
+    setPublicLobbies: Dispatch<SetStateAction<Lobby[]>>
+    setPrivateLobbiess: Dispatch<SetStateAction<Lobby[]>>
+    addLobby: (run: Lobby) => void;
+    removeLobby: (runId: number) => void;
+    updateLobbyStatus: (runId: number, status: RunStatus) => void;
     addRoute: (runRoute: RunRoute) => void;
   }
 

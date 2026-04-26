@@ -1,7 +1,7 @@
 import { ArrowLeft, Plus, X, CheckCircle, Trash2, Map } from "lucide-react";
 import { LobbyCard } from "../components/LobbyCard";
 import { useNavigate } from "react-router-dom";
-import { useRuns } from "../context/RunContext";
+import { useRuns } from "../context/LobbyContext";
 import type { Lobby, RunRoute } from "../types/runTypes";
 import { useEffect, useState } from "react";
 import StaticRouteMap from "../components/RouteMap";
@@ -13,13 +13,13 @@ export default function Lobbies() {
   const {
     publicRuns,
     runRoutes,
-    myPrivateRuns,
-    myPublicRuns,
-    setPublicRuns,
-    setPrivateRuns,
+    myPrivateLobbiess,
+    myPublicLobbies,
+    setPublicLobbies,
+    setPrivateLobbiess,
     addRoute,
-    addRun,
-    removeRun,
+    addLobby,
+    removeLobby,
   } = useRuns();
   const { profile } = useUser();
 
@@ -27,9 +27,9 @@ export default function Lobbies() {
 
   const isJoined = (run: Lobby): boolean => {
     if (!profile) return false;
-    const exists = myPrivateRuns.find((r) => r.id === run.id);
+    const exists = myPrivateLobbiess.find((r) => r.id === run.id);
     if (exists) return true;
-    const exists2 = myPublicRuns.find((r) => r.id === run.id);
+    const exists2 = myPublicLobbies.find((r) => r.id === run.id);
     if (exists2) return true;
     return false;
   };
@@ -42,7 +42,7 @@ export default function Lobbies() {
     if (!profile?.uid) return;
 
     if (!isJoined(run)) {
-      const setter = run.isPrivate ? setPrivateRuns : setPublicRuns;
+      const setter = run.isPrivate ? setPrivateLobbiess : setPublicLobbies;
 
       setter((prevRuns: Lobby[]) => {
         return prevRuns.map((r) => {
@@ -65,7 +65,7 @@ export default function Lobbies() {
     if (!profile?.uid) return;
 
     if (isJoined(run)) {
-      const setter = run.isPrivate ? setPrivateRuns : setPublicRuns;
+      const setter = run.isPrivate ? setPrivateLobbiess : setPublicLobbies;
 
       setter((prevRuns: Lobby[]) => {
         return prevRuns.map((r) => {
@@ -84,7 +84,7 @@ export default function Lobbies() {
   };
   //add default functions
   const handleDelete = (run: Lobby) => {
-    removeRun(run.id);
+    removeLobby(run.id);
     setSelectedLobby(null);
   };
 
@@ -114,11 +114,11 @@ export default function Lobbies() {
         </div>
 
         {/* My Runs Section */}
-        {myPublicRuns.length > 0 && (
+        {myPublicLobbies.length > 0 && (
           <div className="mb-8">
             <h2 className="text-lg font-semibold mb-3">My Runs</h2>
             <div className="flex flex-col gap-3">
-              {myPublicRuns.map((run) => {
+              {myPublicLobbies.map((run) => {
                 const route = runRoutes.find((r) => r.id === run.routeId);
                 return (
                   <div

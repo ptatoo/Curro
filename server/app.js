@@ -60,12 +60,12 @@ app.post('/api/auth/google', useRoute(async (req, res) => {
   });
 
   const { sub: googleId, email, name } = ticket.getPayload();
+  const numericUid = Number(googleId.substring(0, 15)); // Truncated to fit JS MAX_SAFE_INTEGER
 
-  if (!Users.getById(googleId)) {
-    Users.create({ uid: googleId, googleId, email, name });
+  if (!Users.getById(numericUid)) {
+    Users.create({ uid: numericUid, googleId, email, name });
   }
-
-  res.status(200).json(getJWTToken(googleId));
+  res.status(200).json(getJWTToken(numericUid));
 }));
 
 // --- Users ---
@@ -78,18 +78,16 @@ app.put('/api/users/me', authenticate, useRoute(async (req, res) => {
   res.status(200).json({ success: true });
 }));
 
-/*
-// --- Routes ---
+// --- routes ---
 app.get('/api/routes', authenticate, useRoute(async (req, res) => {
   res.status(200).json(Routes.getAll());
 }));
 
 app.post('/api/routes', authenticate, useRoute(async (req, res) => {
-  const id = Date.now().toString(); 
+  const id = Date.now(); 
   Routes.create({ ...req.body, id });
   res.status(201).json({ id });
 }));
-*/ //deprecated untill we get it working
 
 // --- Lobbies ---
 app.get('/api/lobbies', authenticate, useRoute(async (req, res) => {
@@ -104,10 +102,11 @@ app.get('/api/lobbies/:id/members', authenticate, useRoute(async (req, res) => {
   res.status(200).json(Lobbies.getMembers(req.params.id));
 }));
 
+// Lobbies create fix
 app.post('/api/lobbies', authenticate, useRoute(async (req, res) => {
-  const id = Date.now().toString();
+  const id = Date.now();
   Lobbies.create({ ...req.body, id, creator_id: req.userId, status: 'open' });
-  Lobbies.join(id, req.userId); // Creator auto-joins
+  Lobbies.join(id, req.userId);
   res.status(201).json({ id });
 }));
 

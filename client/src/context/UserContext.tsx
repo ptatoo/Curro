@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { UserContextType, UserProfile } from "../types/authTypes";
 import { API } from "../services/api";
+import type { Lobby } from "../types/runTypes";
 
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -94,13 +95,14 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
   
     
-  // 4. Lobby Methods (Auto-injects jwtToken)
-  const getLobbies = async () => {
+  //----------------------------------
+  // lobby stuff
+  const getLobbies = async (): Promise<Lobby[]> => {
     if (!jwtToken) throw new Error("Not authenticated");
     return await API.lobbies.list(jwtToken);
   };
 
-  const joinLobby = async (lobbyId: string) => {
+  const joinLobby = async (lobbyId: string): Promise<{ success: boolean }> => {
     if (!jwtToken) throw new Error("Not authenticated");
     return await API.lobbies.join(jwtToken, lobbyId);
   };

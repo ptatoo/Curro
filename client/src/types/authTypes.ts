@@ -1,8 +1,9 @@
 import type { Dispatch } from "react";
 import type { SetStateAction } from "react";
+import type { Lobby } from "./runTypes";
 
 export interface UserProfile {
-  uid: string;
+  uid: number;
   email: string;
   name: string;
 
@@ -14,7 +15,7 @@ export interface UserProfile {
   minPace: number;
   maxPace: number;
 
-  friends: string[];
+  friends: number[];
   location: string | null;
 }
 
@@ -32,6 +33,6 @@ export interface UserContextType {
   logout: () => void;
   
   // Lobby Actions
-  getLobbies: () => Promise<any>; 
-  joinLobby: (lobbyId: string) => Promise<any>;
+  getLobbies: () => Promise<Lobby[]>; 
+  joinLobby: (lobbyId: string) => Promise<{ success: boolean }>;
 }

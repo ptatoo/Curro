@@ -6,7 +6,7 @@ export const ProtectedRoute = () => {
 
   if (!jwtToken) {
     // Redirect to login, 'replace' prevents going back to the protected page
-    return <Navigate to="/settings" replace/>;
+    return <Navigate to="/login" replace/>;
   }
   if (false) {
     // Redirect to login, 'replace' prevents going back to the protected page
