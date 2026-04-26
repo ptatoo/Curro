@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useMapsLibrary } from "@vis.gl/react-google-maps";
 
 interface Props {
-  onPlaceSelect: (lat: number, lng: number) => void;
+  onPlaceSelect: (location: string) => void;
 }
 
 export default function PlaceAutocomplete({ onPlaceSelect }: Props) {
@@ -25,11 +25,27 @@ export default function PlaceAutocomplete({ onPlaceSelect }: Props) {
     autocompleteElem.style.fontSize = "16px";
 
     const handleSelect = async (event: any) => {
-      const place = event.place;
-      if (!place.location) {
-        await place.fetchFields({ fields: ["location"] });
+      const prediction = event.placePrediction;
+
+      if (!prediction) {
+        console.error("No prediction found in event");
+        return;
       }
-      onPlaceSelect(place.location.lat(), place.location.lng());
+
+      try {
+        const place = prediction.toPlace();
+
+        // 3. Fetch the fields (this is where the actual network request happens)
+        await place.fetchFields({
+          fields: ["location", "displayName"],
+        });
+
+        const name = place.displayName || "Unknown Location";
+
+        onPlaceSelect(name);
+      } catch (error) {
+        console.error("Error fetching place details:", error);
+      }
     };
 
     autocompleteElem.addEventListener("gmp-select", handleSelect);
