@@ -58,6 +58,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setProfile((prev) => (prev ? { ...prev, ...updates } : null));
   };
 
+  //----------------------------------
+  //4. logging out
   const logout = () => {
     setJwtToken(null);
     setProfile(null);
