@@ -1,67 +1,50 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  ArrowLeft,
-  Users,
-  MapPin,
-  Route,
-  Calendar,
-  Lock,
-  Globe,
-} from "lucide-react";
-
-export interface LobbyData {
-  name: string;
-  location: string;
-  route: string;
-  date: string;
-  time: string;
-  maxParticipants: number;
-  distance: string;
-  isPublic: boolean;
-  description: string;
-}
+import { ArrowLeft } from "lucide-react";
+import { useRuns } from "../context/RunContext";
 
 export default function CreateLobby() {
   const navigate = useNavigate();
+  const { addRun, addRoute, publicRuns, runRoutes } = useRuns();
 
   const [name, setName] = useState("");
-  const [location, setLocation] = useState("");
-  const [route, setRoute] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [maxParticipants, setMaxParticipants] = useState("10");
   const [distance, setDistance] = useState("");
-  const [isPublic, setIsPublic] = useState(true);
-  const [description, setDescription] = useState("");
+  const [pace, setPace] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newLobby: LobbyData = {
+    const newRouteId = (runRoutes.length > 0 ? Math.max(...runRoutes.map(r => r.id)) : 0) + 1;
+    const newRunId = (publicRuns.length > 0 ? Math.max(...publicRuns.map(r => r.id)) : 0) + 1;
+
+    addRoute({
+      id: newRouteId,
       name,
-      location,
-      route,
-      date,
-      time,
-      maxParticipants: parseInt(maxParticipants),
-      distance,
-      isPublic,
-      description,
-    };
+      route: "{}",
+      distance: parseFloat(distance) || 0,
+    });
 
-    // TEMP: just log for now
-    console.log("Created lobby:", newLobby);
+    addRun({
+      id: newRunId,
+      creatorId: "current-user",
+      routeId: newRouteId,
+      startTime: new Date(`${date}T${time}`),
+      targetPace: parseFloat(pace) || 0,
+      maxPlayers: parseInt(maxParticipants),
+      numPlayers: 0,
+      isPrivate: false,
+      status: "open",
+    });
 
-    // go back to lobby list
-    navigate("/lobbies", { state: newLobby });
+    navigate("/lobbies");
   };
 
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-3xl mx-auto">
-
-        {/* Back */}
         <button
           onClick={() => navigate("/lobbies")}
           className="p-2 hover:bg-accent rounded-lg mb-4"
@@ -72,53 +55,61 @@ export default function CreateLobby() {
         <h1 className="text-foreground mb-4">Create New Lobby</h1>
 
         <form onSubmit={handleSubmit} className="space-y-4 bg-card p-6 rounded-lg">
-
           <input
-            placeholder="Name"
-            className="w-full p-2 border rounded"
+            placeholder="Run name (e.g. Morning 5K)"
+            className="w-full p-2 border border-border rounded bg-input-background text-foreground"
             value={name}
             onChange={(e) => setName(e.target.value)}
-          />
-
-          <input
-            placeholder="Location"
-            className="w-full p-2 border rounded"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-          />
-
-          <input
-            placeholder="Route"
-            className="w-full p-2 border rounded"
-            value={route}
-            onChange={(e) => setRoute(e.target.value)}
+            required
           />
 
           <input
             type="date"
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border border-border rounded bg-input-background text-foreground"
             value={date}
             onChange={(e) => setDate(e.target.value)}
+            required
           />
 
           <input
             type="time"
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border border-border rounded bg-input-background text-foreground"
             value={time}
             onChange={(e) => setTime(e.target.value)}
+            required
           />
 
           <input
-            placeholder="Distance (e.g. 5km)"
-            className="w-full p-2 border rounded"
+            placeholder="Distance (km)"
+            type="number"
+            step="0.1"
+            className="w-full p-2 border border-border rounded bg-input-background text-foreground"
             value={distance}
             onChange={(e) => setDistance(e.target.value)}
+            required
           />
 
-          <button className="w-full bg-primary text-white py-2 rounded">
+          <input
+            placeholder="Target pace (min/km)"
+            type="number"
+            step="0.1"
+            className="w-full p-2 border border-border rounded bg-input-background text-foreground"
+            value={pace}
+            onChange={(e) => setPace(e.target.value)}
+            required
+          />
+
+          <input
+            placeholder="Max participants"
+            type="number"
+            className="w-full p-2 border border-border rounded bg-input-background text-foreground"
+            value={maxParticipants}
+            onChange={(e) => setMaxParticipants(e.target.value)}
+          />
+
+          <button className="w-full bg-primary text-primary-foreground py-2 rounded">
             Create Lobby
           </button>
-
         </form>
       </div>
     </div>

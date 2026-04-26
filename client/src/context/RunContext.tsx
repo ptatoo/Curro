@@ -1,16 +1,39 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { RunGroup, RunContextType, RunStatus } from "../types/runTypes.ts";
 import type { RunRoute } from "../types/runTypes.ts";
+import { useUser } from "./UserContext.tsx";
+import type { UserProfile } from "../types/authTypes.ts";
 
 const RunContext = createContext<RunContextType | undefined>(undefined);
 
 export const RunProvider = ({ children }: { children: ReactNode }) => {
   const [publicRuns, setPublicRuns] = useState<RunGroup[]>([]);
   const [privateRuns, setPrivateRuns] = useState<RunGroup[]>([]);
+  const [myPublicRuns, setMyPublicRuns] = useState<RunGroup[]>([]);
+  const [myPrivateRuns, setMyPrivateRuns] = useState<RunGroup[]>([]);
   const [routes, setRoutes] = useState<RunRoute[]>([]);
+  const { profile } = useUser();
 
-  // Helper: Adds a run to the correct list based on its privacy setting
+  useEffect(() => {
+    // 1. Safety check: Ensure profile and UID exist before filtering
+    if (!profile?.uid) return;
+
+    // 2. Filter Public Runs
+    const userPublic = publicRuns.filter((run) =>
+      run.playerIds.includes(profile.uid),
+    );
+
+    // 3. Filter Private Runs
+    const userPrivate = privateRuns.filter((run) =>
+      run.playerIds.includes(profile.uid),
+    );
+
+    // 4. Update the "My Runs" states
+    setMyPublicRuns(userPublic);
+    setMyPrivateRuns(userPrivate);
+  }, [publicRuns, privateRuns, profile?.uid]);
+
   const addRun = (run: RunGroup) => {
     if (run.isPrivate) {
       setPrivateRuns((prev) => {
@@ -27,6 +50,11 @@ export const RunProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const removeRun = (runId: number) => {
+    setPublicRuns((prev) => prev.filter((r) => r.id !== runId));
+    setPrivateRuns((prev) => prev.filter((r) => r.id !== runId));
+  };
+
   const addRoute = (runRoute: RunRoute) => {
     setRoutes((prev) => {
       const exists = prev.some((r) => r.id === runRoute.id);
@@ -35,11 +63,9 @@ export const RunProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  // Helper: Find a run by ID and update its status
   const updateRunStatus = (runId: number, status: RunStatus) => {
     const updater = (runs: RunGroup[]) =>
       runs.map((r) => (r.id === runId ? { ...r, status } : r));
-
     setPublicRuns(updater);
     setPrivateRuns(updater);
   };
@@ -50,9 +76,12 @@ export const RunProvider = ({ children }: { children: ReactNode }) => {
         publicRuns,
         privateRuns,
         runRoutes: routes,
+        myPublicRuns,
+        myPrivateRuns,
         setPublicRuns,
         setPrivateRuns,
         addRun,
+        removeRun,
         updateRunStatus,
         addRoute,
       }}
@@ -62,7 +91,6 @@ export const RunProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Custom hook for the standard "use" pattern
 export const useRuns = () => {
   const context = useContext(RunContext);
   if (!context) throw new Error("useRuns must be used within a RunProvider");

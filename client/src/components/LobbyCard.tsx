@@ -8,7 +8,12 @@ interface LobbyCardProps {
   onClick?: () => void;
 }
 
-export function LobbyCard({ thisRoute, thisLobby, onClick, isJoined }: LobbyCardProps) {
+export function LobbyCard({
+  thisRoute,
+  thisLobby,
+  onClick,
+  isJoined,
+}: LobbyCardProps) {
   return (
     <div
       onClick={onClick}
@@ -21,7 +26,9 @@ export function LobbyCard({ thisRoute, thisLobby, onClick, isJoined }: LobbyCard
         </div>
       )}
 
-      <h3 className="text-card-foreground font-medium pr-16">{thisRoute.name}</h3>
+      <h3 className="text-card-foreground font-medium pr-16">
+        {thisRoute.name}
+      </h3>
 
       <p className="text-muted-foreground text-sm mt-1">
         {thisLobby.startTime.toLocaleString()}
@@ -29,9 +36,11 @@ export function LobbyCard({ thisRoute, thisLobby, onClick, isJoined }: LobbyCard
 
       <div className="mt-4 flex justify-between text-sm">
         <span className="text-muted-foreground">
-          {thisLobby.numPlayers}/{thisLobby.maxPlayers} runners
+          {thisLobby.playerIds.length}/{thisLobby.maxPlayers} runners
         </span>
-        <span className="text-primary font-medium">{thisRoute.distance} km</span>
+        <span className="text-primary font-medium">
+          {thisRoute.distance} km
+        </span>
       </div>
 
       <p className="mt-3 text-sm text-primary font-medium">View details →</p>

@@ -27,14 +27,7 @@ export default function StaticRouteMap({ route }: { route: string }) {
         defaultZoom={14}
         mapId={"1"}
       >
-        <RoutePolyline
-          points={[
-            { lat: 34.07141, lng: -118.43874 },
-            { lat: 34.06853, lng: -118.43362 },
-            { lat: 34.06737, lng: -118.43155 },
-          ]}
-          color="#FF0000"
-        />
+        <RoutePolyline points={[points]} color="#FF0000" />
       </Map>
     </div>
   );

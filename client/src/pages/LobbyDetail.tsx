@@ -1,3 +1,4 @@
+/*
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
@@ -25,7 +26,6 @@ export default function LobbyDetail() {
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-3xl mx-auto">
 
-        {/* Back */}
         <button
           onClick={() => navigate("/lobbies")}
           className="p-2 hover:bg-accent rounded-lg mb-4"
@@ -33,10 +33,8 @@ export default function LobbyDetail() {
           <ArrowLeft className="w-6 h-6" />
         </button>
 
-        {/* Title */}
         <h1 className="text-xl font-bold mb-4">{lobby.name}</h1>
 
-        {/* Info */}
         <div className="bg-card border border-border rounded-lg p-6 space-y-2">
           <p><b>Location:</b> {lobby.location}</p>
           <p><b>Time:</b> {lobby.time}</p>
@@ -50,3 +48,4 @@ export default function LobbyDetail() {
     </div>
   );
 }
+  */
