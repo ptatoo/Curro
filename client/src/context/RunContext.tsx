@@ -1,14 +1,38 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { RunGroup, RunContextType, RunStatus } from "../types/runTypes.ts";
 import type { RunRoute } from "../types/runTypes.ts";
+import { useUser } from "./UserContext.tsx";
+import type { UserProfile } from "../types/authTypes.ts";
 
 const RunContext = createContext<RunContextType | undefined>(undefined);
 
 export const RunProvider = ({ children }: { children: ReactNode }) => {
   const [publicRuns, setPublicRuns] = useState<RunGroup[]>([]);
   const [privateRuns, setPrivateRuns] = useState<RunGroup[]>([]);
+  const [myPublicRuns, setMyPublicRuns] = useState<RunGroup[]>([]);
+  const [myPrivateRuns, setMyPrivateRuns] = useState<RunGroup[]>([]);
   const [routes, setRoutes] = useState<RunRoute[]>([]);
+  const { profile } = useUser();
+
+  useEffect(() => {
+    // 1. Safety check: Ensure profile and UID exist before filtering
+    if (!profile?.uid) return;
+
+    // 2. Filter Public Runs
+    const userPublic = publicRuns.filter((run) =>
+      run.playerIds.includes(profile.uid),
+    );
+
+    // 3. Filter Private Runs
+    const userPrivate = privateRuns.filter((run) =>
+      run.playerIds.includes(profile.uid),
+    );
+
+    // 4. Update the "My Runs" states
+    setMyPublicRuns(userPublic);
+    setMyPrivateRuns(userPrivate);
+  }, [publicRuns, privateRuns, profile?.uid]);
 
   const addRun = (run: RunGroup) => {
     if (run.isPrivate) {
@@ -52,6 +76,8 @@ export const RunProvider = ({ children }: { children: ReactNode }) => {
         publicRuns,
         privateRuns,
         runRoutes: routes,
+        myPublicRuns,
+        myPrivateRuns,
         setPublicRuns,
         setPrivateRuns,
         addRun,

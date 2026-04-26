@@ -30,7 +30,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   });
 
   // setProfile({
-  //   uid: "FAKE UID",
+  //   uid: 12346789,
   //   email: "i.alexander.song@gmail.com",
   //   name: "Alex",
   //   minDistance: 0, // Double

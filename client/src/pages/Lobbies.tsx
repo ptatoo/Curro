@@ -4,29 +4,81 @@ import { useNavigate } from "react-router-dom";
 import { useRuns } from "../context/RunContext";
 import type { RunGroup, RunRoute } from "../types/runTypes";
 import { useEffect, useState } from "react";
-import { route1, route2 } from "../services/routes";
-
-const CURRENT_USER_ID = "current-user";
+import StaticRouteMap from "../components/RouteMap";
+import { route3 } from "../services/routes";
+import { useUser } from "../context/UserContext";
 
 export default function Lobbies() {
   const navigate = useNavigate();
-  const { publicRuns, runRoutes, addRoute, addRun, removeRun } = useRuns();
+  const {
+    publicRuns,
+    runRoutes,
+    myPrivateRuns,
+    myPublicRuns,
+    setPublicRuns,
+    setPrivateRuns,
+    addRoute,
+    addRun,
+ , removeRun } = useRuns();
+  const { profile } = useUser();
 
   const [selectedLobby, setSelectedLobby] = useState<RunGroup | null>(null);
-  const [joinedRunIds, setJoinedRunIds] = useState<number[]>([]);
 
-  const isJoined = (run: RunGroup) => joinedRunIds.includes(run.id);
+  const isJoined = (run: RunGroup): boolean => {
+    if (!profile) return false;
+    const exists = myPrivateRuns.find((r) => r.id === run.id);
+    if (exists) return true;
+    const exists2 = myPublicRuns.find((r) => r.id === run.id);
+    if (exists2) return true;
+    return false;
+  };
   const isOwner = (run: RunGroup) => run.creatorId === CURRENT_USER_ID;
 
   const handleJoin = (run: RunGroup) => {
-    if (!isJoined(run)) setJoinedRunIds((prev) => [...prev, run.id]);
+    if (!profile?.uid) return;
+
+    if (!isJoined(run)) {
+      const setter = run.isPrivate ? setPrivateRuns : setPublicRuns;
+
+      setter((prevRuns: RunGroup[]) => {
+        return prevRuns.map((r) => {
+          if (r.id === run.id) {
+            return {
+              ...r,
+              playerIds: [...r.playerIds, profile.uid],
+            };
+          }
+          // Return others unchanged
+          return r;
+        });
+      });
+    }
     setSelectedLobby(null);
   };
 
+  //leave a runGroup
   const handleLeave = (run: RunGroup) => {
-    setJoinedRunIds((prev) => prev.filter((id) => id !== run.id));
-  };
+    if (!profile?.uid) return;
 
+    if (isJoined(run)) {
+      const setter = run.isPrivate ? setPrivateRuns : setPublicRuns;
+
+      setter((prevRuns: RunGroup[]) => {
+        return prevRuns.map((r) => {
+          if (r.id === run.id) {
+            return {
+              ...r,
+              playerIds: r.playerIds.filter((id) => id !== profile.uid),
+            };
+          }
+          return r;
+        });
+      });
+    }
+
+    setSelectedLobby(null);
+  };
+  //add default functions
   const handleDelete = (run: RunGroup) => {
     removeRun(run.id);
     setSelectedLobby(null);
@@ -40,7 +92,7 @@ export default function Lobbies() {
       startTime: new Date(),
       targetPace: 10.6789,
       maxPlayers: 20,
-      numPlayers: 0,
+      playerIds: [17, 38],
       isPrivate: false,
       status: "open",
     } as RunGroup);
@@ -51,23 +103,22 @@ export default function Lobbies() {
       routeId: 2,
       targetPace: 7.6789,
       maxPlayers: 10,
-      numPlayers: 4,
+      playerIds: [17, 38, 57],
       isPrivate: false,
       status: "open",
     } as RunGroup);
-  }, []);
-
+  }, [publicRuns]);
   useEffect(() => {
     addRoute({
       id: 1,
       name: "Morning 5K Run",
-      route: JSON.stringify(route1),
+      route: route3,
       distance: 5,
     } as RunRoute);
     addRoute({
       id: 2,
       name: "Evening Trail Run",
-      route: JSON.stringify(route2),
+      route: route3,
       distance: 2,
     } as RunRoute);
   }, []);
@@ -77,6 +128,8 @@ export default function Lobbies() {
   const selectedRoute = selectedLobby
     ? runRoutes.find((r) => r.id === selectedLobby.routeId)
     : null;
+
+  console.log(selectedRoute);
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -97,11 +150,12 @@ export default function Lobbies() {
           </button>
         </div>
 
-        {joinedRuns.length > 0 && (
+        {/* My Runs Section */}
+        {myPublicRuns.length > 0 && (
           <div className="mb-8">
             <h2 className="text-lg font-semibold mb-3">My Runs</h2>
             <div className="flex flex-col gap-3">
-              {joinedRuns.map((run) => {
+              {myPublicRuns.map((run) => {
                 const route = runRoutes.find((r) => r.id === run.routeId);
                 return (
                   <div
@@ -181,7 +235,7 @@ export default function Lobbies() {
               <p><b>Distance:</b> {selectedRoute?.distance} km</p>
               <p><b>Start Time:</b> {selectedLobby.startTime.toLocaleString()}</p>
               <p><b>Pace:</b> {selectedLobby.targetPace.toFixed(1)} min/km</p>
-              <p><b>Participants:</b> {selectedLobby.numPlayers} / {selectedLobby.maxPlayers}</p>
+              <p><b>Participants:</b> {selectedLobby.playerIds.length} / {selectedLobby.maxPlayers}</p>
             </div>
 
             <div className="w-full h-32 bg-muted border border-border rounded-lg mb-4 flex flex-col items-center justify-center gap-2">

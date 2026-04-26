@@ -17,26 +17,28 @@ import CreateLobby from "./pages/CreateLobby";
 function App() {
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_PUBLIC_CLIENT_ID}>
-      <UserProvider>
-        <RunProvider>
-          <UnitProvider>
-            <BrowserRouter>
-              <Navbar />
-              <main style={{ padding: "20px" }}>
-                <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/lobbies" element={<Lobbies />} />
-                  <Route path="/lobby/new" element={<CreateLobby />} />
-                  <Route path="/settings" element={<Settings />} />
-                  <Route path="/newUser" element={<NewUser />} />
-                  <Route path="*" element={<h2>404 - Not Found</h2>} />
-                </Routes>
-              </main>
-            </BrowserRouter>
-          </UnitProvider>
-        </RunProvider>
-      </UserProvider>
+      <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
+        <UserProvider>
+          <RunProvider>
+            <UnitProvider>
+              <BrowserRouter>
+                <Navbar />
+                <main style={{ padding: "20px" }}>
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/lobbies" element={<Lobbies />} />
+                    <Route path="/lobby/new" element={<CreateLobby />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="/newUser" element={<NewUser />} />
+                    <Route path="*" element={<h2>404 - Not Found</h2>} />
+                  </Routes>
+                </main>
+              </BrowserRouter>
+            </UnitProvider>
+          </RunProvider>
+        </UserProvider>
+      </APIProvider>
     </GoogleOAuthProvider>
   );
 }
