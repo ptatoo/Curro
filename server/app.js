@@ -3,17 +3,13 @@ const express = require('express');
 const { OAuth2Client } = require('google-auth-library');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-const { Users } = require('./db.js'); // Updated to use the DAO
+const { Users, Routes, Lobbies } = require('./db.js');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const oAuth2ClientWeb = new OAuth2Client(
-  process.env.CLIENT_ID, 
-  process.env.CLIENT_SECRET,
-  'postmessaage'
-);
+const oAuth2ClientWeb = new OAuth2Client(process.env.CLIENT_ID, process.env.CLIENT_SECRET);
 
 // --- Middleware ---
 const authenticate = (req, res, next) => {
@@ -30,27 +26,24 @@ const authenticate = (req, res, next) => {
 const getJWTToken = (userId) => {
   const sessionToken = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
   const { exp } = jwt.verify(sessionToken, process.env.JWT_SECRET);
-  return { sessionToken, expiryDate: exp }; // exp is in seconds
+  return { sessionToken, expiryDate: exp }; 
 };
 
-// ----- route thing -----
 const useRoute = (handler) => async (req, res, next) => {
   try {
     await handler(req, res);
   } catch (error) {
-    // This logs the specific reason from Google (e.g., "redirect_uri_mismatch")
     const detail = error.response?.data || error.message;
     console.error(`Detailed Error in ${req.method} ${req.originalUrl}:`, detail);
-    
     res.status(500).json({ error: detail });
   }
 };
-``
+
+// --- Auth ---
 app.post('/api/auth/google', useRoute(async (req, res) => {
   const { code } = req.body;
   if (!code) return res.status(400).json({ error: 'No code provided' });
 
-  // 3. This will now work without throwing a redirect_uri mismatch
   const { tokens } = await oAuth2ClientWeb.getToken({
     code: code,
     redirect_uri: process.env.REDIRECT_URI
@@ -63,59 +56,68 @@ app.post('/api/auth/google', useRoute(async (req, res) => {
 
   const { sub: googleId, email, name } = ticket.getPayload();
 
-  const existingUser = Users.getById(googleId);
-  if (!existingUser) {
+  if (!Users.getById(googleId)) {
     Users.create({ id: googleId, googleId, email, name });
   }
 
-  const sessionData = getJWTToken(googleId);
-  res.status(200).json(sessionData);
+  res.status(200).json(getJWTToken(googleId));
 }));
 
-app.post('/api/test-get-jwt', authenticate, useRoute(async (req, res) => {
-  console.log(req.userId);
-  res.status(200).json(req.userId);
-}));    
-
-app.post('/api/auth/google', useRoute(async (req, res) => {
-  const { code } = req.body;
-  if (!code) return res.status(400).json({ error: 'No code provided' });
-
-  const { tokens } = await oAuth2ClientWeb.getToken(code);
-  const ticket = await oAuth2ClientWeb.verifyIdToken({
-    idToken: tokens.id_token,
-    audience: process.env.CLIENT_ID,
-  });
-
-  //USER CREATION
-  const { sub: googleId, email, name } = ticket.getPayload();
-  const existingUser = Users.getById(googleId);
-  if (!existingUser) {
-    Users.create({ id: googleId, googleId, email, name });
-  }
-
-  //getting jwt session id
-  const sessionData = getJWTToken(googleId);
-  res.status(200).json(sessionData);
+// --- Users ---
+app.get('/api/users/me', authenticate, useRoute(async (req, res) => {
+  res.status(200).json(Users.getById(req.userId));
 }));
 
-
-
-//TESTESTSETSETSETSETSETSETSETSSETSETSETSETAETSETSETAETSETSETAETSETSETAETSETSETAETSETSETAETSETSETA
-
-app.get('/test-auth', authenticate, useRoute(async (req, res) => {
-  console.log(req.userId);
-  res.status(200).json({ success: true, message: "JWT is valid", user: req.userId });
+app.put('/api/users/me', authenticate, useRoute(async (req, res) => {
+  Users.updateSettings({ ...req.body, id: req.userId });
+  res.status(200).json({ success: true });
 }));
 
-app.get('/test', useRoute(async (req, res) => {
-  console.log(req.userId);
-  res.status(200).json({ success: true, message: "valid asf", user: req.userId });
+// --- Routes ---
+app.get('/api/routes', authenticate, useRoute(async (req, res) => {
+  res.status(200).json(Routes.getAll());
 }));
-//TESTESTSETSETSETSETSETSETSETSSETSETSETSETAETSETSETAETSETSETAETSETSETAETSETSETAETSETSETAETSETSETA
 
+app.post('/api/routes', authenticate, useRoute(async (req, res) => {
+  const id = Date.now().toString(); 
+  Routes.create({ ...req.body, id });
+  res.status(201).json({ id });
+}));
 
+// --- Lobbies ---
+app.get('/api/lobbies', authenticate, useRoute(async (req, res) => {
+  res.status(200).json(Lobbies.getPublic());
+}));
 
-// LISTENNING INGINGINGINGINGIGN IGNGINIGN IGNGIN IGGIGIGINGINGINGINGINGINGINGINGINGIG
+app.get('/api/lobbies/me', authenticate, useRoute(async (req, res) => {
+  res.status(200).json(Lobbies.getByUser(req.userId));
+}));
+
+app.get('/api/lobbies/:id/members', authenticate, useRoute(async (req, res) => {
+  res.status(200).json(Lobbies.getMembers(req.params.id));
+}));
+
+app.post('/api/lobbies', authenticate, useRoute(async (req, res) => {
+  const id = Date.now().toString();
+  Lobbies.create({ ...req.body, id, creator_id: req.userId, status: 'open' });
+  Lobbies.join(id, req.userId); // Creator auto-joins
+  res.status(201).json({ id });
+}));
+
+app.post('/api/lobbies/:id/join', authenticate, useRoute(async (req, res) => {
+  Lobbies.join(req.params.id, req.userId);
+  res.status(200).json({ success: true });
+}));
+
+app.delete('/api/lobbies/:id/leave', authenticate, useRoute(async (req, res) => {
+  Lobbies.leave(req.params.id, req.userId);
+  res.status(200).json({ success: true });
+}));
+
+app.get('/TEST', useRoute(async (req, res) => {
+  res.status(200).json("URAAZING");
+}));
+
+// --- Init ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
