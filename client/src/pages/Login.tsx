@@ -1,7 +1,6 @@
   import React, { useEffect } from "react";
   import { useAuth } from "../hooks/useAuth";
   import { useUser } from "../context/UserContext";
-  import MapPicker from "../components/MapPicker";
   import { APIProvider } from "@vis.gl/react-google-maps";
   import PlaceAutocomplete from "../components/PlaceAutocomplete";
   import { useNavigate } from "react-router-dom";
