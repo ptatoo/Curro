@@ -6,7 +6,7 @@ interface PolylineProps {
   color?: string;
 }
 
-export const RoutePolyline = ({ points, color = "#FF0000" }: PolylineProps) => {
+export const RoutePolyline = ({ points, color = "var(--route-color)" }: PolylineProps) => {
   const map = useMap();
   const mapsLib = useMapsLibrary("maps");
 

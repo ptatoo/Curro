@@ -50,7 +50,7 @@ const containerStyle: React.CSSProperties = {
   alignItems: "center",
   padding: "1rem 5%",
   backgroundColor: "var(--card)",
-  boxShadow: "0 2px 12px rgba(107,66,38,0.15)",
+  boxShadow: "0 2px 12px rgba(0,0,0,0.3)",
   position: "sticky",
   top: 0,
   zIndex: 1000,

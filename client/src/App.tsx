@@ -29,7 +29,6 @@ function App() {
                     <Route path="/lobbies" element={<Lobbies />} />
                     <Route path="/lobby/new" element={<CreateLobby />} />
                     <Route path="/settings" element={<Settings />} />
-                    <Route path="/newUser" element={<NewUser />} />
                     <Route path="*" element={<h2>404 - Not Found</h2>} />
                   </Routes>
                 </main>
