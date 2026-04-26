@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
+import { Settings } from "lucide-react";
 
 const Navbar = () => {
-  // We use a function for the style to dynamically change based on 'isActive'
   const navLinkStyle = ({
     isActive,
   }: {
@@ -12,10 +12,9 @@ const Navbar = () => {
     textDecoration: "none",
     fontWeight: "600",
     transition: "all 0.2s ease",
-    // In 2026, Vite projects usually prefer dark/light modes
-    background: isActive ? "#646cff" : "transparent",
-    color: isActive ? "white" : "#555",
-    border: isActive ? "1px solid #646cff" : "1px solid #ddd",
+    background: isActive ? "#6b4226" : "transparent",
+    color: isActive ? "#f5f0e8" : "#7a6652",
+    border: isActive ? "1px solid #6b4226" : "1px solid #c9b99a",
   });
 
   return (
@@ -26,32 +25,32 @@ const Navbar = () => {
         <NavLink to="/" style={navLinkStyle}>
           Home
         </NavLink>
-        <NavLink to="/login" style={navLinkStyle}>
-          Login
+        <NavLink
+          to="/settings"
+          style={({ isActive }) => ({
+            padding: "10px",
+            borderRadius: "8px",
+            textDecoration: "none",
+            transition: "all 0.2s ease",
+            background: isActive ? "#6b4226" : "transparent",
+            color: isActive ? "#f5f0e8" : "#7a6652",
+            border: isActive ? "1px solid #6b4226" : "1px solid #c9b99a",
+          })}
+        >
+          <Settings size={26} />
         </NavLink>
-        {/* <NavLink to="/lobbies" style={navLinkStyle}>
-          Lobbies
-        </NavLink>
-        <NavLink to="/settings" style={navLinkStyle}>
-          Settings
-        </NavLink>
-        <NavLink to="/newUser" style={navLinkStyle}>
-          newUsers
-        </NavLink> */}
-        {/* If you wanted an About route, you'd add it here too */}
       </div>
     </nav>
   );
 };
 
-// Simple Flexbox Styles
 const containerStyle: React.CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
   padding: "1rem 5%",
-  backgroundColor: "#ffffff",
-  boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+backgroundColor: "#ddd4c4",
+boxShadow: "0 2px 12px rgba(107,66,38,0.15)",
   position: "sticky",
   top: 0,
   zIndex: 1000,
@@ -60,7 +59,7 @@ const containerStyle: React.CSSProperties = {
 const logoStyle: React.CSSProperties = {
   fontSize: "1.5rem",
   fontWeight: "bold",
-  color: "#646cff",
+  color: "#6b4226",
 };
 
 const linksContainer: React.CSSProperties = {
