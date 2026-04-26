@@ -1,11 +1,10 @@
-// For Vite (React Web on port 5173), use import.meta.env
-
-import type { UserProfile } from "../types/authTypes";
-
-// For Create React App, use process.env.REACT_APP_BACKEND_URL
 const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
-
-const apiFetch = async (path: string, { method = 'GET', token, body }: { method?: string; token?: string; body?: any } = {}) => {
+// ------------------------------
+// 1. boilerplate
+const apiFetch = async (
+  path: string, 
+  { method = 'GET', token, body }: { method?: string; token?: string; body?: unknown } = {}
+) => {
   const url = path.startsWith('http') ? path : `${BASE_URL}${path}`;
   
   const res = await fetch(url, {
@@ -25,22 +24,22 @@ const apiFetch = async (path: string, { method = 'GET', token, body }: { method?
   return res.json();
 };
 
+//2 actua functions, use by function(params, params2, ...)
 export const API = {
   auth: {
     exchangeGoogleCode: async (code: string): Promise<string> => {
       const data = await apiFetch('/api/auth/google', { method: 'POST', body: { code } });
       return data.sessionToken;
-    },
-    
-    getGoogleProfile: (googleAccessToken: string) => 
-      apiFetch('https://www.googleapis.com/oauth2/v3/userinfo', { token: googleAccessToken }),
+    }
   },
   
   user: {
     getMe: (token: string) => 
       apiFetch('/api/users/me', { token }),
     
-    updateMe: (token: string, data: UserProfile) => 
+    // 2. Changed data: any to data: Record<string, unknown> 
+    // (represents a generic object, standard for JSON payloads)
+    updateMe: (token: string, data: Record<string, unknown>) => 
       apiFetch('/api/users/me', { method: 'PUT', token, body: data }),
   },
   
