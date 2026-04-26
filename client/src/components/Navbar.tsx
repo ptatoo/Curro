@@ -29,7 +29,7 @@ const Navbar = () => {
         <NavLink to="/login" style={navLinkStyle}>
           Login
         </NavLink>
-        <NavLink to="/lobbies" style={navLinkStyle}>
+        {/* <NavLink to="/lobbies" style={navLinkStyle}>
           Lobbies
         </NavLink>
         <NavLink to="/settings" style={navLinkStyle}>
@@ -37,7 +37,7 @@ const Navbar = () => {
         </NavLink>
         <NavLink to="/newUser" style={navLinkStyle}>
           newUsers
-        </NavLink>
+        </NavLink> */}
         {/* If you wanted an About route, you'd add it here too */}
       </div>
     </nav>

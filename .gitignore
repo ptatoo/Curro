@@ -50,3 +50,5 @@ dist-ssr
 *.sln
 *.sw?
 >>>>>>> 2a454b16556ae9ee7e988d1b01f1f2679f33eec7
+
+*.env
