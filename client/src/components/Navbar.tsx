@@ -12,9 +12,9 @@ const Navbar = () => {
     textDecoration: "none",
     fontWeight: "600",
     transition: "all 0.2s ease",
-    background: isActive ? "#6b4226" : "transparent",
-    color: isActive ? "#f5f0e8" : "#7a6652",
-    border: isActive ? "1px solid #6b4226" : "1px solid #c9b99a",
+    background: isActive ? "var(--primary)" : "transparent",
+    color: isActive ? "var(--primary-foreground)" : "var(--muted-foreground)",
+    border: isActive ? "1px solid var(--primary)" : "1px solid var(--accent)",
   });
 
   return (
@@ -32,9 +32,9 @@ const Navbar = () => {
             borderRadius: "8px",
             textDecoration: "none",
             transition: "all 0.2s ease",
-            background: isActive ? "#6b4226" : "transparent",
-            color: isActive ? "#f5f0e8" : "#7a6652",
-            border: isActive ? "1px solid #6b4226" : "1px solid #c9b99a",
+            background: isActive ? "var(--primary)" : "transparent",
+            color: isActive ? "var(--primary-foreground)" : "var(--muted-foreground)",
+            border: isActive ? "1px solid var(--primary)" : "1px solid var(--accent)",
           })}
         >
           <Settings size={26} />
@@ -49,8 +49,8 @@ const containerStyle: React.CSSProperties = {
   justifyContent: "space-between",
   alignItems: "center",
   padding: "1rem 5%",
-backgroundColor: "#ddd4c4",
-boxShadow: "0 2px 12px rgba(107,66,38,0.15)",
+  backgroundColor: "var(--card)",
+  boxShadow: "0 2px 12px rgba(107,66,38,0.15)",
   position: "sticky",
   top: 0,
   zIndex: 1000,
@@ -59,7 +59,7 @@ boxShadow: "0 2px 12px rgba(107,66,38,0.15)",
 const logoStyle: React.CSSProperties = {
   fontSize: "1.5rem",
   fontWeight: "bold",
-  color: "#6b4226",
+  color: "var(--primary)",
 };
 
 const linksContainer: React.CSSProperties = {
