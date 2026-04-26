@@ -8,7 +8,7 @@ export const ProtectedRoute = () => {
     // Redirect to login, 'replace' prevents going back to the protected page
     return <Navigate to="/settings" replace/>;
   }
-  if () {
+  if (false) {
     // Redirect to login, 'replace' prevents going back to the protected page
     return <Navigate to="/settings" replace/>;
   }
