@@ -49,9 +49,6 @@ export default function Settings() {
   const [isEditing, setIsEditing] = useState(false);
   const { profile, setProfile } = useUser();
 
-  // Master settings always stored in km
-  console.log(profile);
-
   // Draft uses display unit for the input fields
   const [draftProfile, setDraftProfile] = useState({
     location: profile?.location || "",
@@ -67,22 +64,35 @@ export default function Settings() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    setDraftProfile((prev) => {
-      const minDistKm = unit === "km" ? prev.minDist : miToKm(prev.minDist);
-      const maxDistKm = unit === "km" ? prev.maxDist : miToKm(prev.maxDist);
-      setProfile((profilePrev) => {
-        if (!profilePrev) return null;
-        return {
-          ...profilePrev,
-          minDist: minDistKm,
-          maxDist: maxDistKm,
-          minPace: prev.minPace,
-          maxPace: prev.maxPace,
-        } as UserProfile;
-      });
-      return { ...prev, minDist: minDistKm, maxDist: maxDistKm };
+    const minDistKm =
+      unit === "km" ? draftProfile.minDist : miToKm(draftProfile.minDist);
+    const maxDistKm =
+      unit === "km" ? draftProfile.maxDist : miToKm(draftProfile.maxDist);
+    setProfile((profilePrev) => {
+      if (!profilePrev) return null;
+      return {
+        ...profilePrev,
+        location: draftProfile.location,
+        minDist: minDistKm,
+        maxDist: maxDistKm,
+        minPace: draftProfile.minPace,
+        maxPace: draftProfile.maxPace,
+      };
     });
+
+    // 3. Update the Local Draft State (to keep it in sync)
+    setDraftProfile((prev) => ({
+      ...prev,
+      minDist: minDistKm,
+      maxDist: maxDistKm,
+    }));
     setIsEditing(false);
+  };
+
+  const setLocation = (location: string) => {
+    setDraftProfile((prev) => {
+      return { ...prev, location: location };
+    });
   };
 
   const toggleUnit = () => setUnit(unit === "km" ? "mi" : "km");
@@ -208,6 +218,7 @@ export default function Settings() {
         </div>
       </div>
 
+      {/* Modal */}
       {isEditing && (
         <div
           className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center"
@@ -230,24 +241,16 @@ export default function Settings() {
                 <label className="flex items-center gap-2 text-card-foreground mb-2 text-sm">
                   <MapPin className="w-4 h-4" /> Location
                 </label>
-                <PlaceAutocomplete onPlaceSelect={() => {}} />
-                <input
-                  type="text"
-                  value={0}
-                  onChange={(e) => {}}
-                  className="w-full px-4 py-2 bg-input-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="e.g., New York, NY"
-                  required
-                />
+                <PlaceAutocomplete onPlaceSelect={setLocation} />
               </div>
 
               <div>
-                <label className="flex items-center gap-2 text-card-foreground mb-2 text-sm">
+                {/* <label className="flex items-center gap-2 text-card-foreground mb-2 text-sm">
                   <Target className="w-4 h-4" /> Distance Goal —{" "}
                   <span className="font-semibold text-primary">
                     {draftDistance.toFixed(1)} {unit} / week
                   </span>
-                </label>
+                </label> */}
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground text-sm whitespace-nowrap">
                     {unit} / week
@@ -256,12 +259,12 @@ export default function Settings() {
               </div>
 
               <div>
-                <label className="flex items-center gap-2 text-card-foreground mb-2 text-sm">
+                {/* <label className="flex items-center gap-2 text-card-foreground mb-2 text-sm">
                   <Clock className="w-4 h-4" /> Pace Goal —{" "}
                   <span className="font-semibold text-primary">
                     {secsToDisplay(draftPace)} / {unit}
                   </span>
-                </label>
+                </label> */}
                 <div className="flex items-center gap-2">
                   {/* <input
                     type="number"
