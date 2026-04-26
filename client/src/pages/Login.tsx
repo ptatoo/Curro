@@ -1,6 +1,9 @@
 import React from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useUser } from "../context/UserContext";
+import MapPicker from "../components/MapPicker";
+import { APIProvider } from "@vis.gl/react-google-maps";
+import PlaceAutocomplete from "../components/PlaceAutocomplete";
 
 const Login = () => {
   const { login } = useAuth();
@@ -35,6 +38,7 @@ const Login = () => {
               <button className="text-primary hover:underline">Sign up</button>
             </p>
           </div>
+          <div></div>
         </div>
       </div>
     </div>
