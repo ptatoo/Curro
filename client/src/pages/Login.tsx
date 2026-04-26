@@ -1,17 +1,14 @@
 import React from "react";
-import { useState } from "react";
+import { useAuth } from "../hooks/useAuth";
+import { useUser } from "../context/UserContext";
 
-interface LoginProps {
-  onLogin: () => void;
-}
-
-const Login = ({ onLogin }: LoginProps) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const Login = () => {
+  const { login } = useAuth();
+  const { jwtToken, profile } = useUser();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin();
+    login();
   };
 
   return (
@@ -26,13 +23,15 @@ const Login = ({ onLogin }: LoginProps) => {
           <button
             type="submit"
             className="w-full bg-primary text-primary-foreground py-3 rounded-md hover:opacity-90 transition-opacity"
+            onClick={handleSubmit}
           >
             Sign In With Google
           </button>
 
           <div className="mt-4 text-center">
             <p className="text-muted-foreground text-sm">
-              Don't have an account?{" "}
+              Don't have an account? Jwt:{jwtToken} Profile:{" "}
+              {JSON.stringify(profile)}
               <button className="text-primary hover:underline">Sign up</button>
             </p>
           </div>
