@@ -10,7 +10,6 @@ export const RunProvider = ({ children }: { children: ReactNode }) => {
   const [privateRuns, setPrivateRuns] = useState<RunGroup[]>([]);
   const [routes, setRoutes] = useState<RunRoute[]>([]);
 
-  // Helper: Adds a run to the correct list based on its privacy setting
   const addRun = (run: RunGroup) => {
     if (run.isPrivate) {
       setPrivateRuns((prev) => {
@@ -27,6 +26,11 @@ export const RunProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const removeRun = (runId: number) => {
+    setPublicRuns((prev) => prev.filter((r) => r.id !== runId));
+    setPrivateRuns((prev) => prev.filter((r) => r.id !== runId));
+  };
+
   const addRoute = (runRoute: RunRoute) => {
     setRoutes((prev) => {
       const exists = prev.some((r) => r.id === runRoute.id);
@@ -35,11 +39,9 @@ export const RunProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  // Helper: Find a run by ID and update its status
   const updateRunStatus = (runId: number, status: RunStatus) => {
     const updater = (runs: RunGroup[]) =>
       runs.map((r) => (r.id === runId ? { ...r, status } : r));
-
     setPublicRuns(updater);
     setPrivateRuns(updater);
   };
@@ -53,6 +55,7 @@ export const RunProvider = ({ children }: { children: ReactNode }) => {
         setPublicRuns,
         setPrivateRuns,
         addRun,
+        removeRun,
         updateRunStatus,
         addRoute,
       }}
@@ -62,7 +65,6 @@ export const RunProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Custom hook for the standard "use" pattern
 export const useRuns = () => {
   const context = useContext(RunContext);
   if (!context) throw new Error("useRuns must be used within a RunProvider");

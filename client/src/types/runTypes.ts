@@ -1,7 +1,7 @@
 export type RunStatus = 'open' | 'active' | 'completed';
 
 export interface RunGroup {
-  id: number; // Added an ID for React list keys
+  id: number;
   creatorId: string;
   routeId: number;
   startTime: Date;
@@ -19,13 +19,14 @@ export interface RunContextType {
   setPublicRuns: (runs: RunGroup[]) => void;
   setPrivateRuns: (runs: RunGroup[]) => void;
   addRun: (run: RunGroup) => void;
+  removeRun: (runId: number) => void;
   updateRunStatus: (runId: number, status: RunStatus) => void;
   addRoute: (runRoute: RunRoute) => void;
 }
 
 export interface RunRoute {
-  id: number,
+  id: number;
   name: string;
   route: string;
-  distance: number; //miles
+  distance: number;
 }
