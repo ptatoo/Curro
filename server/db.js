@@ -9,11 +9,11 @@ db.exec(`
     googleId TEXT UNIQUE NOT NULL,
     email TEXT UNIQUE NOT NULL,
     name TEXT NOT NULL,
-    bio TEXT DEFAULT 's',
-    location TEXT,
+    bio TEXT DEFAULT '',
+    location TEXT NULL,
     pace_avg REAL DEFAULT -1,
     dist_pref REAL DEFAULT -1,
-    total_runs INTEGER DEFAULT 0
+    total_runs INTEGER DEFAULT 0,
   );
 
   CREATE TABLE IF NOT EXISTS routes (

@@ -10,6 +10,7 @@ export const useAuth = () => {
       try {
         // Send google's oauth code to backend for accessToken
         const token = await fetchJwtToken(codeResponse.code);
+        console.log(token);
         
         // Store in Global Context
         setJwtToken(token);
