@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { UserContextType, UserProfile } from "../types/authTypes";
+import { API } from "../services/api";
+
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
@@ -54,7 +56,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   //----------------------------------
   //3. update userProfile
-  const updateProfile = (updates: Partial<UserProfile>) => {
+  const updateProfile = async (updates: Partial<UserProfile>) => {
+    //1. client side sync
     setProfile((prev) => {
       // If we have a profile, update it. If not, create a base object with the updates!
       if (!prev) {
@@ -62,6 +65,18 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
       return { ...prev, ...updates };
     });
+    
+    //try syncing with cloud
+    if(jwtToken)
+    try {
+      // Assuming your api.ts method is API.user.updateMe
+      await API.user.updateMe(jwtToken, updates);
+      console.log("Successfully saved to database");
+    } catch (error) {
+      console.error("Failed to sync with database:", error);
+      // Optional: Add a toast notification here to tell the user "Changes may not be saved"
+    }
+    console.error("it all works")
   };
 
   //----------------------------------

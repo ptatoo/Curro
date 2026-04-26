@@ -62,7 +62,7 @@ app.post('/api/auth/google', useRoute(async (req, res) => {
   const { sub: googleId, email, name } = ticket.getPayload();
 
   if (!Users.getById(googleId)) {
-    Users.create({ id: googleId, googleId, email, name });
+    Users.create({ uid: googleId, googleId, email, name });
   }
 
   res.status(200).json(getJWTToken(googleId));
@@ -74,7 +74,7 @@ app.get('/api/users/me', authenticate, useRoute(async (req, res) => {
 }));
 
 app.put('/api/users/me', authenticate, useRoute(async (req, res) => {
-  Users.updateSettings({ ...req.body, id: req.userId });
+  Users.updateSettings({ ...req.body, uid: req.userId });
   res.status(200).json({ success: true });
 }));
 
