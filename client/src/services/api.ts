@@ -15,7 +15,7 @@ export const fetchJwtToken = async (code: string): Promise<string> => {
   
   if (!response.ok) throw new Error("Backend authentication failed");
   const data = await response.json();
-  return data.jwtToken; // Your backend's generated JWT
+  return data.sessionToken
 };
 
 /* Google Profile
