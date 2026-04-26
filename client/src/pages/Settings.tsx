@@ -1,92 +1,89 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, MapPin, Target, Calendar, Clock, Pencil, X } from "lucide-react";
+import { useUnit } from "../context/UnitContext";
 
 type Settings = {
   location: string;
-  distanceGoal: string;
-  paceGoal: string;
+  distanceGoalKm: number;   // always stored in km internally
+  paceGoalPerKm: string;    // always stored as min/km internally
   runsPerWeek: string;
 };
 
-type Unit = "km" | "mi";
-
-function kmToMi(km: number) {
-  return (km * 0.621371).toFixed(1);
-}
-
-function miToKm(mi: number) {
-  return (mi / 0.621371).toFixed(1);
-}
-
+// Helpers
+function kmToMi(km: number) { return (km * 0.621371); }
+function miToKm(mi: number) { return (mi / 0.621371); }
 function paceKmToMi(pace: string) {
   const [mins, secs] = pace.split(":").map(Number);
   const totalSecs = (mins * 60 + secs) * 0.621371;
-  const newMins = Math.floor(totalSecs / 60);
-  const newSecs = Math.round(totalSecs % 60);
-  return `${newMins}:${String(newSecs).padStart(2, "0")}`;
+  const m = Math.floor(totalSecs / 60);
+  const s = Math.round(totalSecs % 60);
+  return `${m}:${String(s).padStart(2, "0")}`;
 }
-
 function paceMiToKm(pace: string) {
   const [mins, secs] = pace.split(":").map(Number);
   const totalSecs = (mins * 60 + secs) / 0.621371;
-  const newMins = Math.floor(totalSecs / 60);
-  const newSecs = Math.round(totalSecs % 60);
-  return `${newMins}:${String(newSecs).padStart(2, "0")}`;
+  const m = Math.floor(totalSecs / 60);
+  const s = Math.round(totalSecs % 60);
+  return `${m}:${String(s).padStart(2, "0")}`;
 }
 
 export default function Settings() {
   const navigate = useNavigate();
+  const { unit, setUnit } = useUnit();
   const [isEditing, setIsEditing] = useState(false);
-  const [unit, setUnit] = useState<Unit>("km");
 
+  // Master settings always stored in km
   const [settings, setSettings] = useState<Settings>({
     location: "New York, NY",
-    distanceGoal: "25",
-    paceGoal: "5:30",
+    distanceGoalKm: 25,
+    paceGoalPerKm: "5:30",
     runsPerWeek: "3",
   });
 
-  const [draft, setDraft] = useState<Settings>(settings);
-
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSettings(draft);
-    setIsEditing(false);
-  };
+  // Draft uses display unit for the input fields
+  const [draftLocation, setDraftLocation] = useState(settings.location);
+  const [draftDistanceDisplay, setDraftDistanceDisplay] = useState("");
+  const [draftPaceDisplay, setDraftPaceDisplay] = useState("");
+  const [draftRuns, setDraftRuns] = useState(settings.runsPerWeek);
 
   const handleOpenEdit = () => {
-    setDraft(settings);
+    setDraftLocation(settings.location);
+    setDraftDistanceDisplay(
+      unit === "km"
+        ? settings.distanceGoalKm.toFixed(1)
+        : kmToMi(settings.distanceGoalKm).toFixed(1)
+    );
+    setDraftPaceDisplay(
+      unit === "km" ? settings.paceGoalPerKm : paceKmToMi(settings.paceGoalPerKm)
+    );
+    setDraftRuns(settings.runsPerWeek);
     setIsEditing(true);
   };
 
-  const toggleUnit = () => {
-    if (unit === "km") {
-      setUnit("mi");
-      setSettings((s) => ({
-        ...s,
-        distanceGoal: kmToMi(parseFloat(s.distanceGoal)),
-        paceGoal: paceKmToMi(s.paceGoal),
-      }));
-      setDraft((d) => ({
-        ...d,
-        distanceGoal: kmToMi(parseFloat(d.distanceGoal)),
-        paceGoal: paceKmToMi(d.paceGoal),
-      }));
-    } else {
-      setUnit("km");
-      setSettings((s) => ({
-        ...s,
-        distanceGoal: miToKm(parseFloat(s.distanceGoal)),
-        paceGoal: paceMiToKm(s.paceGoal),
-      }));
-      setDraft((d) => ({
-        ...d,
-        distanceGoal: miToKm(parseFloat(d.distanceGoal)),
-        paceGoal: paceMiToKm(d.paceGoal),
-      }));
-    }
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    const distKm =
+      unit === "km" ? parseFloat(draftDistanceDisplay) : miToKm(parseFloat(draftDistanceDisplay));
+    const paceKm = unit === "km" ? draftPaceDisplay : paceMiToKm(draftPaceDisplay);
+    setSettings({
+      location: draftLocation,
+      distanceGoalKm: distKm,
+      paceGoalPerKm: paceKm,
+      runsPerWeek: draftRuns,
+    });
+    setIsEditing(false);
   };
+
+  const toggleUnit = () => setUnit(unit === "km" ? "mi" : "km");
+
+  // Display values derived from canonical km values
+  const displayDistance =
+    unit === "km"
+      ? settings.distanceGoalKm.toFixed(1)
+      : kmToMi(settings.distanceGoalKm).toFixed(1);
+  const displayPace =
+    unit === "km" ? settings.paceGoalPerKm : paceKmToMi(settings.paceGoalPerKm);
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -94,10 +91,7 @@ export default function Settings() {
 
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-2 hover:bg-accent rounded-lg transition-colors"
-          >
+          <button onClick={() => navigate(-1)} className="p-2 hover:bg-accent rounded-lg transition-colors">
             <ArrowLeft className="w-6 h-6 text-foreground" />
           </button>
           <h1 className="text-foreground">Settings</h1>
@@ -113,22 +107,14 @@ export default function Settings() {
               <div className="flex items-center rounded-lg border border-border overflow-hidden text-sm font-medium">
                 <button
                   onClick={() => unit !== "km" && toggleUnit()}
-                  className={`px-3 py-2 transition-colors ${
-                    unit === "km"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-accent"
-                  }`}
+                  className={`px-3 py-2 transition-colors ${unit === "km" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent"}`}
                 >
                   km
                 </button>
                 <div className="w-px h-full bg-border" />
                 <button
                   onClick={() => unit !== "mi" && toggleUnit()}
-                  className={`px-3 py-2 transition-colors ${
-                    unit === "mi"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-accent"
-                  }`}
+                  className={`px-3 py-2 transition-colors ${unit === "mi" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent"}`}
                 >
                   mi
                 </button>
@@ -156,14 +142,14 @@ export default function Settings() {
               <Target className="w-5 h-5 text-muted-foreground shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground mb-0.5">Distance Goal (per week)</p>
-                <p className="text-foreground font-medium">{settings.distanceGoal} {unit} / week</p>
+                <p className="text-foreground font-medium">{displayDistance} {unit} / week</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Clock className="w-5 h-5 text-muted-foreground shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground mb-0.5">Pace Goal</p>
-                <p className="text-foreground font-medium">{settings.paceGoal} / {unit}</p>
+                <p className="text-foreground font-medium">{displayPace} / {unit}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -179,109 +165,82 @@ export default function Settings() {
 
       {/* Edit Modal */}
       {isEditing && (
-        <div
-          className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center"
-          onClick={() => setIsEditing(false)}
-        >
-          <div
-            className="bg-card border border-border rounded-2xl p-8 max-w-md w-full mx-4 relative"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setIsEditing(false)}
-              className="absolute top-4 right-4 p-1 hover:bg-accent rounded-lg"
-            >
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center" onClick={() => setIsEditing(false)}>
+          <div className="bg-card border border-border rounded-2xl p-8 max-w-md w-full mx-4 relative" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setIsEditing(false)} className="absolute top-4 right-4 p-1 hover:bg-accent rounded-lg">
               <X className="w-5 h-5 text-muted-foreground" />
             </button>
-
             <h2 className="text-xl font-bold mb-6">Edit Preferences</h2>
-
             <form onSubmit={handleSave} className="space-y-5">
 
-              {/* Location */}
               <div>
                 <label className="flex items-center gap-2 text-card-foreground mb-2 text-sm">
-                  <MapPin className="w-4 h-4" />
-                  Location
+                  <MapPin className="w-4 h-4" /> Location
                 </label>
                 <input
                   type="text"
-                  value={draft.location}
-                  onChange={(e) => setDraft({ ...draft, location: e.target.value })}
+                  value={draftLocation}
+                  onChange={(e) => setDraftLocation(e.target.value)}
                   className="w-full px-4 py-2 bg-input-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="e.g., New York, NY"
                   required
                 />
               </div>
 
-              {/* Distance Goal */}
               <div>
                 <label className="flex items-center gap-2 text-card-foreground mb-2 text-sm">
-                  <Target className="w-4 h-4" />
-                  Distance Goal (per week)
+                  <Target className="w-4 h-4" /> Distance Goal (per week)
                 </label>
                 <div className="flex items-center gap-2">
                   <input
                     type="number"
                     step="0.1"
-                    value={draft.distanceGoal}
-                    onChange={(e) => setDraft({ ...draft, distanceGoal: e.target.value })}
+                    value={draftDistanceDisplay}
+                    onChange={(e) => setDraftDistanceDisplay(e.target.value)}
                     className="w-full px-4 py-2 bg-input-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="25"
                     required
                   />
                   <span className="text-muted-foreground text-sm whitespace-nowrap">{unit} / week</span>
                 </div>
               </div>
 
-              {/* Pace Goal */}
               <div>
                 <label className="flex items-center gap-2 text-card-foreground mb-2 text-sm">
-                  <Clock className="w-4 h-4" />
-                  Pace Goal
+                  <Clock className="w-4 h-4" /> Pace Goal
                 </label>
                 <div className="flex items-center gap-2">
                   <input
-                    type="number"
-                    min="0"
-                    max="59"
-                    value={draft.paceGoal.split(":")[0] ?? ""}
+                    type="number" min="0" max="59"
+                    value={draftPaceDisplay.split(":")[0] ?? ""}
                     onChange={(e) => {
-                      const secs = draft.paceGoal.split(":")[1] ?? "00";
-                      setDraft({ ...draft, paceGoal: `${e.target.value}:${secs}` });
+                      const secs = draftPaceDisplay.split(":")[1] ?? "00";
+                      setDraftPaceDisplay(`${e.target.value}:${secs}`);
                     }}
                     className="w-20 px-3 py-2 bg-input-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="5"
                     required
                   />
                   <span className="text-muted-foreground">:</span>
                   <input
-                    type="number"
-                    min="0"
-                    max="59"
-                    value={draft.paceGoal.split(":")[1] ?? ""}
+                    type="number" min="0" max="59"
+                    value={draftPaceDisplay.split(":")[1] ?? ""}
                     onChange={(e) => {
-                      const mins = draft.paceGoal.split(":")[0] ?? "0";
-                      const secs = e.target.value.padStart(2, "0");
-                      setDraft({ ...draft, paceGoal: `${mins}:${secs}` });
+                      const mins = draftPaceDisplay.split(":")[0] ?? "0";
+                      setDraftPaceDisplay(`${mins}:${e.target.value.padStart(2, "0")}`);
                     }}
                     className="w-20 px-3 py-2 bg-input-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="30"
                     required
                   />
                   <span className="text-muted-foreground text-sm whitespace-nowrap">/ {unit}</span>
                 </div>
               </div>
 
-              {/* Runs Per Week */}
               <div>
                 <label className="flex items-center gap-2 text-card-foreground mb-2 text-sm">
-                  <Calendar className="w-4 h-4" />
-                  Runs Per Week
+                  <Calendar className="w-4 h-4" /> Runs Per Week
                 </label>
                 <select
-                  value={draft.runsPerWeek}
-                  onChange={(e) => setDraft({ ...draft, runsPerWeek: e.target.value })}
+                  value={draftRuns}
+                  onChange={(e) => setDraftRuns(e.target.value)}
                   className="w-full px-4 py-2 bg-input-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   {["1","2","3","4","5","6","7"].map((n) => (
@@ -291,17 +250,10 @@ export default function Settings() {
               </div>
 
               <div className="flex gap-3 pt-1">
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(false)}
-                  className="flex-1 py-3 border border-border text-foreground font-semibold rounded-xl hover:bg-accent transition-colors"
-                >
+                <button type="button" onClick={() => setIsEditing(false)} className="flex-1 py-3 border border-border text-foreground font-semibold rounded-xl hover:bg-accent transition-colors">
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-3 bg-primary text-primary-foreground font-semibold rounded-xl hover:opacity-90 transition-opacity"
-                >
+                <button type="submit" className="flex-1 py-3 bg-primary text-primary-foreground font-semibold rounded-xl hover:opacity-90 transition-opacity">
                   Save Changes
                 </button>
               </div>

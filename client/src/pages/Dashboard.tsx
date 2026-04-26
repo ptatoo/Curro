@@ -4,11 +4,18 @@ import { History, TrendingUp, MapPin, Clock, Footprints } from "lucide-react";
 import { WelcomeSection } from "../components/WelcomeSection";
 import { StatsCard } from "../components/StatsCard";
 import RunProgressChart from "../components/RunProgressChart";
+import { useUnit } from "../context/UnitContext";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { unit, formatDistance, formatPace, distanceLabel } = useUnit();
 
-  const weeklyData = [
+  // Raw data in km / min-per-km
+  const totalDistanceKm = 129.5;
+  const thisWeekKm = 29.8;
+  const avgPacePerKm = "5:32";
+
+  const weeklyDataKm = [
     { id: "sun", date: "S", distance: 0 },
     { id: "mon", date: "M", distance: 5.2 },
     { id: "tue", date: "T", distance: 0 },
@@ -18,16 +25,37 @@ export default function Dashboard() {
     { id: "sat", date: "S", distance: 6.3 },
   ];
 
+  const weeklyData = weeklyDataKm.map((d) => ({
+    ...d,
+    distance: d.distance === 0 ? 0 : parseFloat(formatDistance(d.distance)),
+  }));
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto">
         <WelcomeSection userName="Alex" onClick={() => navigate("/lobbies")} />
 
         <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatsCard label="Total Distance" value="129.5 km" icon={<MapPin className="w-6 h-6" />} />
-          <StatsCard label="Total Runs" value="24" icon={<Footprints className="w-6 h-6" />} />
-          <StatsCard label="Avg Pace" value="5:32/km" icon={<TrendingUp className="w-6 h-6" />} />
-          <StatsCard label="This Week" value="29.8 km" icon={<Clock className="w-6 h-6" />} />
+          <StatsCard
+            label="Total Distance"
+            value={`${formatDistance(totalDistanceKm)} ${distanceLabel}`}
+            icon={<MapPin className="w-6 h-6" />}
+          />
+          <StatsCard
+            label="Total Runs"
+            value="24"
+            icon={<Footprints className="w-6 h-6" />}
+          />
+          <StatsCard
+            label="Avg Pace"
+            value={`${formatPace(avgPacePerKm)}/${distanceLabel}`}
+            icon={<TrendingUp className="w-6 h-6" />}
+          />
+          <StatsCard
+            label="This Week"
+            value={`${formatDistance(thisWeekKm)} ${distanceLabel}`}
+            icon={<Clock className="w-6 h-6" />}
+          />
         </div>
 
         <div className="mt-6">
