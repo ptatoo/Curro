@@ -2,7 +2,7 @@ import React from "react";
 import { useEffect } from "react";
 import { useRuns } from "../context/RunContext";
 import type { RunGroup, RunRoute } from "../types/runTypes";
-import { route1, route2, route3, route4, route5, route6, route7, route8, route9, route10, route11, route12 } from "../services/routes";
+import { route1, route2, route3, route4, route7 } from "../services/routes";
 
 const LobbyRouterCreater = () => {
   const { publicRuns, addRoute, addRun } = useRuns();
@@ -12,7 +12,7 @@ const LobbyRouterCreater = () => {
       id: 1,
       creatorId: 123456789,
       routeId: 1,
-      startTime: new Date(),
+      startTime: new Date("2026-04-27T06:30:00"),
       targetPace: 10.6789,
       maxPlayers: 20,
       playerIds: [17, 38],
@@ -22,7 +22,7 @@ const LobbyRouterCreater = () => {
     addRun({
       id: 2,
       creatorId: 124356789,
-      startTime: new Date(),
+      startTime: new Date("2026-04-27T18:00:00"),
       routeId: 2,
       targetPace: 7.6789,
       maxPlayers: 10,
@@ -33,7 +33,7 @@ const LobbyRouterCreater = () => {
     addRun({
       id: 3,
       creatorId: 124356789,
-      startTime: new Date(),
+      startTime: new Date("2026-04-28T19:00:00"),
       routeId: 3,
       targetPace: 8.30,
       maxPlayers: 10,
@@ -44,7 +44,7 @@ const LobbyRouterCreater = () => {
     addRun({
       id: 4,
       creatorId: 124356789,
-      startTime: new Date(),
+      startTime: new Date("2026-04-28T7:30:00"),
       routeId: 4,
       targetPace: 9.30,
       maxPlayers: 10,
@@ -55,7 +55,7 @@ const LobbyRouterCreater = () => {
     addRun({
       id: 5,
       creatorId: 124356789,
-      startTime: new Date(),
+      startTime: new Date("2026-04-29T06:00:00"),
       routeId: 5,
       targetPace: 10,
       maxPlayers: 10,
@@ -66,7 +66,7 @@ const LobbyRouterCreater = () => {
     addRun({
       id: 6,
       creatorId: 124356789,
-      startTime: new Date(),
+      startTime: new Date("2026-04-29T16:00:00"),
       routeId: 6,
       targetPace: 7.5,
       maxPlayers: 10,
@@ -77,7 +77,7 @@ const LobbyRouterCreater = () => {
     addRun({
       id: 7,
       creatorId: 124356789,
-      startTime: new Date(),
+      startTime: new Date("2026-04-30T08:00:00"),
       routeId: 7,
       targetPace: 8,
       maxPlayers: 10,
@@ -86,6 +86,7 @@ const LobbyRouterCreater = () => {
       status: "open",
     } as RunGroup);
   }, [publicRuns]);
+
   useEffect(() => {
     addRoute({
       id: 1,
@@ -124,7 +125,7 @@ const LobbyRouterCreater = () => {
       distance: 4.8,
     } as RunRoute);
     addRoute({
-      id: 6,
+      id: 7,
       name: "UCLA Campus Loop",
       route: route7,
       distance: 4.1,
