@@ -11,7 +11,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [jwtToken, setJwtToken] = useState<string | null>(() => {
     return localStorage.getItem("app_jwt_token");
   });
-  
+
   //Profile
   const [profile, setProfile] = useState<UserProfile | null>(() => {
     const storage = localStorage.getItem("app_profile");
@@ -39,19 +39,31 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [profile]);
 
+  //CREATE A USER BY CRASHING PROGRAM
+  // setProfile({
+  //   uid: 2345,
+  //   email: "i.alexander.song@gmail.com",
+  //   name: "bob",
+  //   minDistance: 3,
+  //   maxDistance: 5,
+  //   minPace: 9,
+  //   maxPace: 15,
+  //   friends: [],
+  //   location: null,
+  // } as UserProfile);
+
   //----------------------------------
   //3. update userProfile
   const updateProfile = (updates: Partial<UserProfile>) => {
     setProfile((prev) => (prev ? { ...prev, ...updates } : null));
   };
 
-
   const logout = () => {
     setJwtToken(null);
     setProfile(null);
   };
 
-    return (
+  return (
     <UserContext.Provider
       value={{
         jwtToken,

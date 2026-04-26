@@ -4,12 +4,12 @@ export interface UserProfile {
   name: string;
 
   //ranges
-  minDistance: number; // Double
-  maxDistance: number; // Double
+  minDistance: number;
+  maxDistance: number;
 
   //ranges
-  minPace: number; // Double
-  maxPace: number; // Double
+  minPace: number;
+  maxPace: number;
 
   friends: string[];
   location: string | null;
