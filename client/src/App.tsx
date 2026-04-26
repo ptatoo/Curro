@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { UserProvider } from "./context/UserContext";
 import { RunProvider } from "./context/RunContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { APIProvider } from "@vis.gl/react-google-maps";
 
 import Navbar from "./components/Navbar";
 
@@ -16,27 +17,29 @@ import CreateLobby from "./pages/CreateLobby";
 function App() {
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_PUBLIC_CLIENT_ID}>
-      <UserProvider>
-        <RunProvider>
-          <BrowserRouter>
-            <Navbar />
+      <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
+        <UserProvider>
+          <RunProvider>
+            <BrowserRouter>
+              <Navbar />
 
-            <main style={{ padding: "20px" }}>
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/lobbies" element={<Lobbies />} />
-                <Route path="/lobby/new" element={<CreateLobby />} />
+              <main style={{ padding: "20px" }}>
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/lobbies" element={<Lobbies />} />
+                  <Route path="/lobby/new" element={<CreateLobby />} />
 
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/newUser" element={<NewUser />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/newUser" element={<NewUser />} />
 
-                <Route path="*" element={<h2>404 - Not Found</h2>} />
-              </Routes>
-            </main>
-          </BrowserRouter>
-        </RunProvider>
-      </UserProvider>
+                  <Route path="*" element={<h2>404 - Not Found</h2>} />
+                </Routes>
+              </main>
+            </BrowserRouter>
+          </RunProvider>
+        </UserProvider>
+      </APIProvider>
     </GoogleOAuthProvider>
   );
 }
