@@ -21,9 +21,17 @@ export interface UserProfile {
 export interface UserContextType {
   jwtToken: string | null;
   profile: UserProfile | null;
-  // Functions to update the state
-  setJwtToken: (token: string) => void;
-  setProfile:  Dispatch<SetStateAction<UserProfile | null>>;
-  updateProfile: (updates: Partial<UserProfile>) => void;
+  
+  // State Setters
+  setJwtToken: (token: string | null) => void;
+  setProfile: Dispatch<SetStateAction<UserProfile | null>>;
+  
+  // Async API Actions
+  fetchProfile: () => Promise<UserProfile | null>;
+  updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   logout: () => void;
+  
+  // Lobby Actions
+  getLobbies: () => Promise<any>; 
+  joinLobby: (lobbyId: string) => Promise<any>;
 }

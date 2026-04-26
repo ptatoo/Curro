@@ -8,7 +8,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   //----------------------------------
-  //storage STUFF
+  // use states
   //JWT
   const [jwtToken, setJwtToken] = useState<string | null>(() => {
     return localStorage.getItem("app_jwt_token");
@@ -24,7 +24,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   });
 
   //----------------------------------
-  //2. syncs actual state to local storge 
+  //Storage sync
   useEffect(() => {
     if (jwtToken) {
       localStorage.setItem("app_jwt_token", jwtToken);
@@ -55,7 +55,21 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   // } as UserProfile);
 
   //----------------------------------
-  //3. update userProfile
+  //USER METHODS
+  const fetchProfile = async () => {
+    if (!jwtToken) return null;
+    try {
+      const data = await API.user.getMe(jwtToken);
+      setProfile(data); // Sync DB data to local state
+      return data;
+    } catch (error) {
+      console.error("Failed to fetch profile:", error);
+      return null;
+    }
+  };
+  
+  //----------------------------------
+  //PROFILE METHODS
   const updateProfile = async (updates: Partial<UserProfile>) => {
     //1. client side sync
     setProfile((prev) => {
@@ -65,6 +79,18 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
       return { ...prev, ...updates };
     });
+
+    
+  // 4. Lobby Methods (Auto-injects jwtToken)
+  const getLobbies = async () => {
+    if (!jwtToken) throw new Error("Not authenticated");
+    return await API.lobbies.list(jwtToken);
+  };
+
+  const joinLobby = async (lobbyId: string) => {
+    if (!jwtToken) throw new Error("Not authenticated");
+    return await API.lobbies.join(jwtToken, lobbyId);
+  };
     
     //try syncing with cloud
     if(jwtToken)
@@ -93,8 +119,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         profile,
         setJwtToken,
         setProfile,
-        updateProfile, // One function to rule them all
+        fetchProfile,
+        updateProfile,
         logout,
+        getLobbies,
+        joinLobby,
       }}
     >
       {children}
