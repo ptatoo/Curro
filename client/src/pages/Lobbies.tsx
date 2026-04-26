@@ -123,6 +123,7 @@ export default function Lobbies() {
                 return (
                   <div
                     key={run.id}
+                    onClick={() => setSelectedLobby(run)}
                     className="flex items-center justify-between bg-card border border-border rounded-xl px-5 py-4"
                   >
                     <div className="flex items-center gap-3">
@@ -137,14 +138,20 @@ export default function Lobbies() {
                     </div>
                     {isOwner(run) ? (
                       <button
-                        onClick={() => handleDelete(run)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(run);
+                        }}
                         className="text-sm text-destructive hover:opacity-70 transition-opacity ml-4"
                       >
                         Cancel
                       </button>
                     ) : (
                       <button
-                        onClick={() => handleLeave(run)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleLeave(run);
+                        }}
                         className="text-sm text-muted-foreground hover:text-destructive transition-colors ml-4"
                       >
                         Leave
@@ -175,6 +182,7 @@ export default function Lobbies() {
         </div>
       </div>
 
+      {/* --- Lobby Modal --- */}
       {selectedLobby && (
         <div
           className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center"

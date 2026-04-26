@@ -19,7 +19,7 @@ const Navbar = () => {
 
   return (
     <nav style={containerStyle}>
-      <div style={logoStyle}>MyRunApp</div>
+      <div style={logoStyle}>Curro</div>
 
       <div style={linksContainer}>
         <NavLink to="/" style={navLinkStyle}>
@@ -33,8 +33,12 @@ const Navbar = () => {
             textDecoration: "none",
             transition: "all 0.2s ease",
             background: isActive ? "var(--primary)" : "transparent",
-            color: isActive ? "var(--primary-foreground)" : "var(--muted-foreground)",
-            border: isActive ? "1px solid var(--primary)" : "1px solid var(--accent)",
+            color: isActive
+              ? "var(--primary-foreground)"
+              : "var(--muted-foreground)",
+            border: isActive
+              ? "1px solid var(--primary)"
+              : "1px solid var(--accent)",
           })}
         >
           <Settings size={26} />
