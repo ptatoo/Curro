@@ -5,26 +5,17 @@ import { useUnit } from "../context/UnitContext";
 
 type Settings = {
   location: string;
-  distanceGoalKm: number;   // always stored in km internally
-  paceGoalPerKm: string;    // always stored as min/km internally
+  distanceGoal: number;  // stored in current unit
+  paceGoal: number;      // stored in seconds, in current unit
   runsPerWeek: string;
+  savedUnit: string;     // which unit was active when saved
 };
 
-// Helpers
-function kmToMi(km: number) { return (km * 0.621371); }
-function miToKm(mi: number) { return (mi / 0.621371); }
-function paceKmToMi(pace: string) {
-  const [mins, secs] = pace.split(":").map(Number);
-  const totalSecs = (mins * 60 + secs) * 0.621371;
-  const m = Math.floor(totalSecs / 60);
-  const s = Math.round(totalSecs % 60);
-  return `${m}:${String(s).padStart(2, "0")}`;
-}
-function paceMiToKm(pace: string) {
-  const [mins, secs] = pace.split(":").map(Number);
-  const totalSecs = (mins * 60 + secs) / 0.621371;
-  const m = Math.floor(totalSecs / 60);
-  const s = Math.round(totalSecs % 60);
+function kmToMi(km: number) { return km * 0.621371; }
+function miToKm(mi: number) { return mi / 0.621371; }
+function secsToDisplay(secs: number) {
+  const m = Math.floor(secs / 60);
+  const s = Math.round(secs % 60);
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
@@ -33,63 +24,66 @@ export default function Settings() {
   const { unit, setUnit } = useUnit();
   const [isEditing, setIsEditing] = useState(false);
 
-  // Master settings always stored in km
   const [settings, setSettings] = useState<Settings>({
     location: "New York, NY",
-    distanceGoalKm: 25,
-    paceGoalPerKm: "5:30",
+    distanceGoal: 25,
+    paceGoal: 330,
     runsPerWeek: "3",
+    savedUnit: "km",
   });
 
-  // Draft uses display unit for the input fields
   const [draftLocation, setDraftLocation] = useState(settings.location);
-  const [draftDistanceDisplay, setDraftDistanceDisplay] = useState("");
-  const [draftPaceDisplay, setDraftPaceDisplay] = useState("");
+  const [draftDistance, setDraftDistance] = useState(settings.distanceGoal);
+  const [draftPace, setDraftPace] = useState(settings.paceGoal);
   const [draftRuns, setDraftRuns] = useState(settings.runsPerWeek);
 
   const handleOpenEdit = () => {
     setDraftLocation(settings.location);
-    setDraftDistanceDisplay(
-      unit === "km"
-        ? settings.distanceGoalKm.toFixed(1)
-        : kmToMi(settings.distanceGoalKm).toFixed(1)
-    );
-    setDraftPaceDisplay(
-      unit === "km" ? settings.paceGoalPerKm : paceKmToMi(settings.paceGoalPerKm)
-    );
+    // Convert saved values to current display unit
+    const dist = settings.savedUnit === unit
+      ? settings.distanceGoal
+      : unit === "mi" ? kmToMi(settings.distanceGoal) : miToKm(settings.distanceGoal);
+    const pace = settings.savedUnit === unit
+      ? settings.paceGoal
+      : unit === "mi" ? settings.paceGoal / 0.621371 : settings.paceGoal * 0.621371;
+    setDraftDistance(dist);
+    setDraftPace(pace);
     setDraftRuns(settings.runsPerWeek);
     setIsEditing(true);
   };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    const distKm =
-      unit === "km" ? parseFloat(draftDistanceDisplay) : miToKm(parseFloat(draftDistanceDisplay));
-    const paceKm = unit === "km" ? draftPaceDisplay : paceMiToKm(draftPaceDisplay);
     setSettings({
       location: draftLocation,
-      distanceGoalKm: distKm,
-      paceGoalPerKm: paceKm,
+      distanceGoal: draftDistance,
+      paceGoal: draftPace,
       runsPerWeek: draftRuns,
+      savedUnit: unit,
     });
     setIsEditing(false);
   };
 
   const toggleUnit = () => setUnit(unit === "km" ? "mi" : "km");
 
-  // Display values derived from canonical km values
-  const displayDistance =
-    unit === "km"
-      ? settings.distanceGoalKm.toFixed(1)
-      : kmToMi(settings.distanceGoalKm).toFixed(1);
-  const displayPace =
-    unit === "km" ? settings.paceGoalPerKm : paceKmToMi(settings.paceGoalPerKm);
+  // Convert saved values to current display unit
+  const displayDistance = settings.savedUnit === unit
+    ? settings.distanceGoal
+    : unit === "mi" ? kmToMi(settings.distanceGoal) : miToKm(settings.distanceGoal);
+
+  const displayPace = settings.savedUnit === unit
+    ? settings.paceGoal
+    : unit === "mi" ? settings.paceGoal / 0.621371 : settings.paceGoal * 0.621371;
+
+  const distanceMin = unit === "km" ? 1 : kmToMi(1);
+  const distanceMax = unit === "km" ? 100 : kmToMi(100);
+  const paceMin = unit === "km" ? 180 : 180 / 0.621371;
+  const paceMax = unit === "km" ? 600 : 600 / 0.621371;
 
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-3xl mx-auto">
 
-        {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <button onClick={() => navigate(-1)} className="p-2 hover:bg-accent rounded-lg transition-colors">
             <ArrowLeft className="w-6 h-6 text-foreground" />
@@ -97,13 +91,10 @@ export default function Settings() {
           <h1 className="text-foreground">Settings</h1>
         </div>
 
-        {/* View Card */}
         <div className="bg-card border border-border rounded-lg p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-card-foreground">Personal Preferences</h2>
             <div className="flex items-center gap-2">
-
-              {/* Unit toggle */}
               <div className="flex items-center rounded-lg border border-border overflow-hidden text-sm font-medium">
                 <button
                   onClick={() => unit !== "km" && toggleUnit()}
@@ -119,7 +110,6 @@ export default function Settings() {
                   mi
                 </button>
               </div>
-
               <button
                 onClick={handleOpenEdit}
                 className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
@@ -142,14 +132,14 @@ export default function Settings() {
               <Target className="w-5 h-5 text-muted-foreground shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground mb-0.5">Distance Goal (per week)</p>
-                <p className="text-foreground font-medium">{displayDistance} {unit} / week</p>
+                <p className="text-foreground font-medium">{displayDistance.toFixed(1)} {unit} / week</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Clock className="w-5 h-5 text-muted-foreground shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground mb-0.5">Pace Goal</p>
-                <p className="text-foreground font-medium">{displayPace} / {unit}</p>
+                <p className="text-foreground font-medium">{secsToDisplay(displayPace)} / {unit}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -163,7 +153,6 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Edit Modal */}
       {isEditing && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center" onClick={() => setIsEditing(false)}>
           <div className="bg-card border border-border rounded-2xl p-8 max-w-md w-full mx-4 relative" onClick={(e) => e.stopPropagation()}>
@@ -171,7 +160,7 @@ export default function Settings() {
               <X className="w-5 h-5 text-muted-foreground" />
             </button>
             <h2 className="text-xl font-bold mb-6">Edit Preferences</h2>
-            <form onSubmit={handleSave} className="space-y-5">
+            <form onSubmit={handleSave} className="space-y-6">
 
               <div>
                 <label className="flex items-center gap-2 text-card-foreground mb-2 text-sm">
@@ -189,48 +178,39 @@ export default function Settings() {
 
               <div>
                 <label className="flex items-center gap-2 text-card-foreground mb-2 text-sm">
-                  <Target className="w-4 h-4" /> Distance Goal (per week)
+                  <Target className="w-4 h-4" /> Distance Goal — <span className="font-semibold text-primary">{draftDistance.toFixed(1)} {unit} / week</span>
                 </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={draftDistanceDisplay}
-                    onChange={(e) => setDraftDistanceDisplay(e.target.value)}
-                    className="w-full px-4 py-2 bg-input-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    required
-                  />
-                  <span className="text-muted-foreground text-sm whitespace-nowrap">{unit} / week</span>
+                <input
+                  type="range"
+                  min={distanceMin}
+                  max={distanceMax}
+                  step="0.5"
+                  value={draftDistance}
+                  onChange={(e) => setDraftDistance(parseFloat(e.target.value))}
+                  className="w-full accent-primary"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>{distanceMin.toFixed(0)} {unit}</span>
+                  <span>{distanceMax.toFixed(0)} {unit}</span>
                 </div>
               </div>
 
               <div>
                 <label className="flex items-center gap-2 text-card-foreground mb-2 text-sm">
-                  <Clock className="w-4 h-4" /> Pace Goal
+                  <Clock className="w-4 h-4" /> Pace Goal — <span className="font-semibold text-primary">{secsToDisplay(draftPace)} / {unit}</span>
                 </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number" min="0" max="59"
-                    value={draftPaceDisplay.split(":")[0] ?? ""}
-                    onChange={(e) => {
-                      const secs = draftPaceDisplay.split(":")[1] ?? "00";
-                      setDraftPaceDisplay(`${e.target.value}:${secs}`);
-                    }}
-                    className="w-20 px-3 py-2 bg-input-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    required
-                  />
-                  <span className="text-muted-foreground">:</span>
-                  <input
-                    type="number" min="0" max="59"
-                    value={draftPaceDisplay.split(":")[1] ?? ""}
-                    onChange={(e) => {
-                      const mins = draftPaceDisplay.split(":")[0] ?? "0";
-                      setDraftPaceDisplay(`${mins}:${e.target.value.padStart(2, "0")}`);
-                    }}
-                    className="w-20 px-3 py-2 bg-input-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    required
-                  />
-                  <span className="text-muted-foreground text-sm whitespace-nowrap">/ {unit}</span>
+                <input
+                  type="range"
+                  min={paceMin}
+                  max={paceMax}
+                  step="5"
+                  value={draftPace}
+                  onChange={(e) => setDraftPace(parseFloat(e.target.value))}
+                  className="w-full accent-primary"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>{secsToDisplay(paceMin)} / {unit}</span>
+                  <span>{secsToDisplay(paceMax)} / {unit}</span>
                 </div>
               </div>
 
